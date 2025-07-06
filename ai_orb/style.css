@@ -1,0 +1,76 @@
+body {
+    background: #0e0e0e;
+    color: #fff;
+    font-family: sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+    flex-direction: column;
+  }
+  
+  .container {
+    text-align: center;
+  }
+  
+  .orb-container {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    margin: 20px auto;
+    cursor: pointer;
+  }
+  
+  .orb-core {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(145deg, #00d9ff, #007bff);
+    border-radius: 50%;
+    box-shadow: 0 0 20px rgba(0, 162, 255, 0.6);
+    z-index: 2;
+    position: relative;
+  }
+  
+  .orb-wave {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 120px;
+    height: 120px;
+    background: rgba(0, 162, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0;
+    z-index: 1;
+  }
+  
+  .wave1 {
+    animation: pulse 2s infinite;
+  }
+  
+  .wave2 {
+    animation: pulse 2s infinite 1s;
+  }
+  
+  @keyframes pulse {
+    0% {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 0.6;
+    }
+    100% {
+      transform: translate(-50%, -50%) scale(1.8);
+      opacity: 0;
+    }
+  }
+  
+  /* Listening Mode Enhancements */
+  .orb-container.listening .orb-core {
+    background: linear-gradient(145deg, #08fdd8, #4bffa5);
+    box-shadow: 0 0 30px rgba(8, 253, 216, 0.7);
+  }
+  
+  .orb-container.listening .orb-wave {
+    background: rgba(8, 253, 216, 0.15);
+  }
+  

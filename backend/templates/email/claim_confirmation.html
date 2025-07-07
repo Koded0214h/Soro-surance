@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Claim Submission Confirmation</title>
+</head>
+<body style="font-family: Arial, sans-serif; background: #f9f9f9; padding: 20px;">
+    <div style="max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 10px;">
+        <h2 style="color: #4CAF50;">✅ Your Claim Has Been Submitted!</h2>
+
+        <p>Hello{{ user_name }},</p>
+
+        <p>Thank you for submitting your claim to <strong>Claim Whisperer</strong>.</p>
+
+        <p><strong>Claim ID:</strong> {{ claim_id }}</p>
+        <p><strong>Status:</strong> {{ status|title }}</p>
+
+        <p>You can track your claim status using the link below:</p>
+
+        <a href="{{ tracker_url }}" style="display:inline-block; background: #4CAF50; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none;">Track My Claim</a>
+
+        {% if is_guest %}
+        <p style="margin-top: 20px; color: #999;">
+            You submitted as a guest. <strong><a href="https://claimwhisperer.com/login">Login or Register</a></strong> to easily manage and receive updates on your claims.
+        </p>
+        {% endif %}
+
+        <p style="margin-top: 30px;">Warm regards,<br><strong>Claim Whisperer Team</strong></p>
+    </div>
+</body>
+</html>

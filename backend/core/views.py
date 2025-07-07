@@ -7,6 +7,8 @@ import requests, time
 import os
 
 from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
 from django.contrib.auth import get_user_model
 
 from .serializers import (
@@ -16,6 +18,7 @@ from .serializers import (
 from .models import (
     Claim, Attachment
 )
+from .utils.send_email import send_claim_confirmation_email
 
 User = get_user_model()
 
@@ -79,7 +82,21 @@ class ClaimCreateView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         user = self.request.user if self.request.user.is_authenticated else None
-        serializer.save(submitted_by=user)
+        claim = serializer.save(submitted_by=user)
+
+        # Determine who to send email to
+        if user and user.email:
+            # Logged-in user
+            to_email = user.email
+            is_guest = False
+        else:
+            # Check for guest email passed via request.data (your frontend should send this)
+            to_email = self.request.data.get("email")
+            is_guest = True
+
+        if to_email:
+            send_claim_confirmation_email(claim, to_email, is_guest)
+
         
 class ClaimDetailView(generics.RetrieveAPIView):
     queryset = Claim.objects.all()
@@ -169,3 +186,20 @@ class AttachmentUploadView(APIView):
         attachment = Attachment.objects.create(claim=claim, file=file_obj)
         serializer = AttachmentSerializer(attachment)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+def send_claim_confirmation_email(claim, to_email, is_guest=False):
+    subject = f"📝 Claim Submitted: {claim.claim_id}"
+    from_email = "Claim Whisperer <no-reply@yourdomain.com>"
+    tracker_url = f"http://127.0.0.1:8000/track?claim_id={claim.claim_id}"  # change to your frontend tracker link
+
+    html_content = render_to_string("email/claim_confirmation.html", {
+        "user_name": claim.user.first_name if claim.user else "",
+        "claim_id": claim.claim_id,
+        "status": claim.status,
+        "tracker_url": tracker_url,
+        "is_guest": is_guest
+    })
+
+    email = EmailMultiAlternatives(subject, "", from_email, [to_email])
+    email.attach_alternative(html_content, "text/html")
+    email.send()

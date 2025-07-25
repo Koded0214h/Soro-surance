@@ -284,4 +284,4 @@ cython_debug/
 .yarn/unplugged
 .yarn/build-state.yml
 .yarn/install-state.gz
-.pnp.* 
+.pnp.* gcloud-key.json

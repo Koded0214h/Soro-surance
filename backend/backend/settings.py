@@ -39,6 +39,7 @@ ASSEMBLYAI_API_KEY = os.getenv('ASSEMBLYAI_API_KEY')
 INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
+    'drf_spectacular',
     'core',
     'corsheaders',
     'django_extensions',
@@ -67,6 +68,14 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Soro Surance API',
+    'DESCRIPTION': 'Voice-first claim filing platform for Nigeria.',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
 }
 
 

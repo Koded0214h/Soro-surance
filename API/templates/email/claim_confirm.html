@@ -1,0 +1,41 @@
+<!-- claims/templates/email/claim_confirmation.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .box {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        .button {
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h2>🎉 Claim Successfully Submitted</h2>
+    <div class="box">
+        <p><strong>Claim ID:</strong> {{ claim.claim_id }}</p>
+        <p><strong>Location:</strong> {{ claim.location }}</p>
+        <p><strong>Date:</strong> {{ claim.incident_date }}</p>
+        <p><strong>Status:</strong> {{ claim.status|title }}</p>
+    </div>
+
+    {% if is_anonymous %}
+    <p>You submitted this claim as a guest. Please <a href="https://your-domain.com/login">log in</a> to track your claim in the future.</p>
+    {% else %}
+    <p>You can track the claim using the button below:</p>
+    <a class="button" href="https://your-domain.com/track?claim_id={{ claim.claim_id }}">Track Your Claim</a>
+    {% endif %}
+
+    <p style="margin-top: 30px;">Thanks for using Claim Whisperer!</p>
+</body>
+</html>

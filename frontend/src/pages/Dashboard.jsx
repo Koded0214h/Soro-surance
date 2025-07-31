@@ -11,7 +11,7 @@ import {
   Tooltip,
   Legend
 } from 'chart.js';
-import Navbar from '../component/Navbar';
+import Navbar2 from '../component/Navbar2';
 
 
 // Register ChartJS components
@@ -140,7 +140,7 @@ const Dashboard = () => {
 
   return (
     <>
-    <Navbar />
+    <Navbar2 />
     <div className="p-6 bg-gray-50 min-h-screen">
       <h1 className="text-3xl font-bold text-gray-800 mb-6 mt-16 text-center">Dashboard</h1>
       <p className="text-gray-600 mb-8 text-center">Overview of key metrics and trends in claims processing</p>

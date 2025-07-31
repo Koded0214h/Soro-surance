@@ -58,15 +58,17 @@ const Notifications = () => {
         <div className="space-y-2">
           <div className='flex flex-row gap-[50px]'>
             <GoPlus className='bg-orange-100 text-5xl p-1 font-bold'/>
+            <a href="/listen">
           <button className=" mb-5 font-bold w-72 text-left p-3 bg-gray-50 shadow-md hover:bg-gray-100 rounded-lg text-gray-700 text-sm transition-colors">
             Submit a New Claim
-          </button>
+          </button></a>
           </div>
           <div className='flex flex-row gap-[50px]'>
             <FcMenu className='bg-orange-100 text-5xl p-2 font-bold'/>
-          <button className=" mb-5 w-full font-bold text-left p-3 bg-gray-50 shadow-md hover:bg-gray-100 rounded-lg text-gray-700 text-sm transition-colors">
+            <a href="/claimd">
+          <button className=" mb-5 w-72 font-bold text-left p-3 bg-gray-50 shadow-md hover:bg-gray-100 rounded-lg text-gray-700 text-sm transition-colors">
             View All Claims
-          </button>
+          </button></a>
           </div>
           <div className='flex flex-row gap-[50px]'>
             <CiCircleQuestion className='bg-orange-100 text-5xl p-2 font-bold'/>

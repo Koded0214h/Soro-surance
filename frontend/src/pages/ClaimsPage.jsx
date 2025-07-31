@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FiEye, FiFilter, FiChevronDown } from 'react-icons/fi';
-import Navbar from '../component/Navbar';
+import Navbar2 from '../component/Navbar2';
 
 const ClaimsPage = () => {
   const [activeTab, setActiveTab] = useState('All');
@@ -36,7 +36,7 @@ const ClaimsPage = () => {
 
   return (
     <>
-    <Navbar />
+    <Navbar2 />
     <div className="p-6 max-w-6xl mx-auto">
       {/* Header */}
       <div className="mb-8">

@@ -11,6 +11,12 @@ import Settings from "./pages/Settings";
 import ClaimsPage from "./pages/ClaimsPage";
 import Listening from "./pages/Listening";
 import Navbar from "./component/Navbar";
+import Udashboard from "./pages/Udashboard";
+import ClaimStatus from "./ClaimStatus";
+import Registration from "./pages/Registration";
+import SupportPage from "./pages/Support";
+import Navbar2 from "./component/Navbar2";
+import AdminAuth from "./pages/AdminAuth";
 
 function App() {
     return (
@@ -25,6 +31,13 @@ function App() {
         <Route path="/settings" element={<Settings/>}/>
         <Route path="/claimp" element={<ClaimsPage/>}/>
         <Route path="/listen" element={<Listening/>}/>
+        <Route path="/udash" element={<Udashboard/>}/>
+        <Route path="/claimstatus" element={<ClaimStatus/>}/>
+        <Route path="/reg" element={<Registration/>}/>
+        <Route path="/support" element={<SupportPage/>}/>
+        <Route path="/adminauth" element={<AdminAuth/>}/>
+
+
 
         
 

@@ -232,6 +232,7 @@ const Listening = () => {
         )}
 
         {!confirmed && transcription && (
+          <a href="/details">
           <button
             style={{
               marginTop: '2rem',
@@ -252,6 +253,7 @@ const Listening = () => {
           >
             Confirm Claim
           </button>
+          </a>
         )}
       </div>
     </>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FiCopy, FiRefreshCw, FiSave } from 'react-icons/fi';
-import Navbar from '../component/Navbar';
+import Navbar2 from '../component/Navbar2';
 const Settings = () => {
   const [apiKey, setApiKey] = useState('sk_live_1234567890abcdef1234567890abcdef');
   const [selectedSTT, setSelectedSTT] = useState('google');
@@ -24,7 +24,7 @@ const Settings = () => {
 
   return (
     <>
-    <Navbar/>
+    <Navbar2 />
     <div className="p-6 max-w-5xl mx-auto">
       <h1 className="text-2xl font-bold text-gray-900 mb-8 mt-16">Settings</h1>
       

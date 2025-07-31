@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Navbar = () => {
+const Navbar2 = () => {
   return (
     <nav className="bg-white fixed left-0 right-0 border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4">
@@ -15,17 +15,14 @@ const Navbar = () => {
             <a href="udash" className="text-orange-700 text-md font-medium hover:text-orange-600">
               Dashboard
             </a>
-            <a href="/claimd" className="text-orange-700 text-md font-medium hover:text-orange-600">
+            <a href="/user" className="text-orange-700 text-md font-medium hover:text-orange-600">
+              Users
+            </a>
+            <a href="/claimp" className="text-orange-700 text-md font-medium hover:text-orange-600">
               Claims
             </a>
-            <a href="/claimstatus" className="text-orange-700 text-md font-medium hover:text-orange-600">
-              Track Claim
-            </a>
-            <a href="/notifications" className="text-orange-700 text-md font-medium hover:text-orange-600">
-              Activity
-            </a>
-            <a href="/support" className="text-orange-700 text-md font-medium hover:text-orange-600">
-            Support
+            <a href="/settings" className="text-orange-700 text-md font-medium hover:text-orange-600">
+            Settings
             </a>
           </div>
         </div>
@@ -34,4 +31,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
+export default Navbar2;

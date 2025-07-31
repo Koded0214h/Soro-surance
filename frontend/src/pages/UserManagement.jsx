@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FiSearch, FiUserX, FiMoreVertical } from 'react-icons/fi';
-import Navbar from '../component/Navbar';
+import Navbar2 from '../component/Navbar2';
 
 const UserManagement = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -26,7 +26,7 @@ const UserManagement = () => {
 
   return (
     <>
-    <Navbar />
+    <Navbar2 />
     <div className="p-6 max-w-6xl mx-auto">
       {/* Header */}
       <div className="mb-8">

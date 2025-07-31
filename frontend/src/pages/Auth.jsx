@@ -63,18 +63,18 @@ const Auth = () => {
                     Password
                   </label>
                   <input
-                    className="bg-orange-100 w-[650px] p-3 rounded-md focus:outline-orange-500"
+                    className="bg-orange-100 w-[650px] p-3 rounded-md focus:outline-orange-500 mb-3"
                     type="password"
                     placeholder="Enter your password"
                   />
                 </div>
-                
+                <a href="/udash">
                 <button
                   type="button"
                   className="bg-orange-500 hover:bg-orange-600 text-white font-bold w-[650px] p-3 rounded-md transition-colors"
                 >
                   Sign up
-                </button>
+                </button></a>
               </form>
             </motion.div>
           ) : (
@@ -111,17 +111,17 @@ const Auth = () => {
                 </div>
                 
                 <div className="flex justify-center">
-                  <a href="#" className="text-sm text-orange-600 hover:text-orange-700 hover:underline">
+                  <a href="#" className="text-sm text-orange-600 hover:text-orange-700 hover:underline mb-4">
                     Forgot Password?
                   </a>
                 </div>
                 
-                <button
+               <a href="/udash"> <button
                   type="button"
                   className="w-[650px] bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
                 >
                   Login
-                </button>
+                </button></a>
               </form>
             </motion.div>
           )}

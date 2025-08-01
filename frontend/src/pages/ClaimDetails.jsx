@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { FiPlay, FiPause } from 'react-icons/fi';
 import { useLocation, useParams } from 'react-router-dom';
 import Navbar from '../component/Navbar';
-import api from '../api';
 
 const ClaimDetails = () => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -90,55 +89,55 @@ const ClaimDetails = () => {
 
   if (!claim) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="dark:bg-gray-900 min-h-screen flex items-center justify-center">
         <Navbar />
-        <div className="flex-grow flex items-center justify-center">
-          <p>No claim data found. Please submit a claim first.</p>
-        </div>
+        <p>No claim data found. Please submit a claim first.</p>
       </div>
+      </>
     );
   }
 
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-20 px-8 flex flex-col lg:flex-row gap-8">
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md flex-1">
-          <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-6">
-            {claim.claimData.id}
-          </h1>
-          
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
-                Voice Data
-              </h2>
-              
-              <div className="bg-orange-50 dark:bg-gray-700 rounded-lg p-4">
-                <h3 className="text-lg font-medium text-gray-800 dark:text-gray-300 mb-3">
-                  Claim Recording
-                </h3>
-                <div className="flex items-center gap-4">
-                  <button
-                    onClick={togglePlayback}
-                    className="p-3 bg-orange-500 hover:bg-orange-600 rounded-full text-white transition-colors"
-                  >
-                    {isPlaying ? <FiPause size={20} /> : <FiPlay size={20} />}
-                  </button>
-                  <div className="flex-1">
-                    <p className="text-gray-900 dark:text-gray-300">
-                      {claim.claimData.id}.wav
-                    </p>
-                    <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2 mt-2">
-                      <div 
-                        className="bg-orange-500 h-2 rounded-full" 
-                        style={{ width: `${progress}%` }}
-                      ></div>
+      <div className="dark:bg-gray-900 min-h-screen">
+        <div className="pt-20 px-8 flex flex-col lg:flex-row gap-8">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md flex-1">
+            <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-6">
+              {claim.claimData.id}
+            </h1>
+            
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
+                  Voice Data
+                </h2>
+                
+                <div className="bg-orange-50 dark:bg-gray-700 rounded-lg p-4">
+                  <h3 className="text-lg font-medium text-gray-800 dark:text-gray-300 mb-3">
+                    Claim Recording
+                  </h3>
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={togglePlayback}
+                      className="p-3 bg-orange-500 hover:bg-orange-600 rounded-full text-white transition-colors"
+                    >
+                      {isPlaying ? <FiPause size={20} /> : <FiPlay size={20} />}
+                    </button>
+                    <div className="flex-1">
+                      <p className="text-gray-900 dark:text-gray-300">
+                        {claim.claimData.id}.wav
+                      </p>
+                      <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2 mt-2">
+                        <div 
+                          className="bg-orange-500 h-2 rounded-full" 
+                          style={{ width: `${progress}%` }}
+                        ></div>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
 
             <div>
               <h3 className="text-lg font-medium text-gray-800 dark:text-gray-300 mb-2">
@@ -177,18 +176,18 @@ const ClaimDetails = () => {
               </p>
             </div>
 
-            <div>
-              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">
-                Status
-              </h3>
-              <p className="text-gray-900 dark:text-gray-300">
-                {claim.claimData.status}
-              </p>
+              <div>
+                <h3 className="text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">
+                  Status
+                </h3>
+                <p className="text-gray-900 dark:text-gray-300">
+                  {claim.claimData.status}
+                </p>
+              </div>
+              
             </div>
-            
           </div>
         </div>
-      </div>
 
       <audio
         ref={audioRef}

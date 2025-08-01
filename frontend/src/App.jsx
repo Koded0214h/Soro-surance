@@ -65,9 +65,7 @@ function App() {
           <Route
             path="/details"
             element={
-              <PrivateRoute>
                 <ClaimDetails />
-              </PrivateRoute>
             }
           />
           <Route
@@ -97,9 +95,7 @@ function App() {
           <Route
             path="/listen"
             element={
-              <PrivateRoute>
                 <Listening />
-              </PrivateRoute>
             }
           />
           <Route

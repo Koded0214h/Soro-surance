@@ -1,48 +1,21 @@
+// ClaimDetails.js
 import React, { useState, useRef, useEffect } from 'react';
-import { FiPlay, FiPause } from 'react-icons/fi';
-import { useLocation, useParams } from 'react-router-dom';
+import { FiPlay, FiPause, FiRefreshCw } from 'react-icons/fi';
+import { useLocation } from 'react-router-dom';
 import Navbar from '../component/Navbar';
-
 const ClaimDetails = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [claim, setClaim] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const audioRef = useRef(null);
   const progressInterval = useRef(null);
   const location = useLocation();
-  const { claim_id } = useParams();
 
   useEffect(() => {
     if (location.state) {
       setClaim(location.state);
-      setLoading(false);
-    } else if (claim_id) {
-      // Fetch claim details from backend
-      const fetchClaim = async () => {
-        try {
-          const response = await api.get(`/claims/track/?claim_id=${claim_id}`);
-          setClaim({
-            claimData: {
-              id: response.data.claim_id,
-              date: response.data.submitted_at,
-              status: response.data.status,
-            },
-            transcription: response.data.transcription || '',
-            audioUrl: response.data.audio_url || '',
-          });
-        } catch (err) {
-          setError('Failed to load claim details.');
-        } finally {
-          setLoading(false);
-        }
-      };
-      fetchClaim();
-    } else {
-      setLoading(false);
     }
-  }, [location.state, claim_id]);
+  }, [location]);
 
   const togglePlayback = () => {
     if (isPlaying) {
@@ -65,40 +38,20 @@ const ClaimDetails = () => {
     };
   }, []);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <div className="flex-grow flex items-center justify-center">
-          <p>Loading claim details...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <div className="flex-grow flex items-center justify-center text-red-600">
-          <p>{error}</p>
-        </div>
-      </div>
-    );
-  }
-
   if (!claim) {
     return (
-      <div className="dark:bg-gray-900 min-h-screen flex items-center justify-center">
-        <Navbar />
+      <>
+      <Navbar />
+      <div className="dark:bg-gray-900 min-h-screen flex items-center justify-center text-2xl">
         <p>No claim data found. Please submit a claim first.</p>
       </div>
+      </>
     );
   }
 
   return (
     <>
-      <Navbar />
+    <Navbar />
       <div className="dark:bg-gray-900 min-h-screen">
         <div className="pt-20 px-8 flex flex-col lg:flex-row gap-8">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md flex-1">
@@ -138,42 +91,42 @@ const ClaimDetails = () => {
                 </div>
               </div>
 
-            <div>
-              <h3 className="text-lg font-medium text-gray-800 dark:text-gray-300 mb-2">
-                Transcribed Text
-              </h3>
-              <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600 h-48 overflow-y-auto">
-                <p className="text-gray-700 dark:text-gray-300">
-                  {claim.transcription || 'No transcription available'}
-                </p>
+              <div>
+                <h3 className="text-lg font-medium text-gray-800 dark:text-gray-300 mb-2">
+                  Transcribed Text
+                </h3>
+                <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600 h-48 overflow-y-auto">
+                  <p className="text-gray-700 dark:text-gray-300">
+                    {claim.transcription || 'No transcription available'}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md lg:w-96">
-          <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6">
-            Claim Details
-          </h2>
-          
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">
-                Claim ID
-              </h3>
-              <p className="text-gray-900 dark:text-gray-300">
-                {claim.claimData.id}
-              </p>
-            </div>
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md lg:w-96">
+            <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6">
+              Claim Details
+            </h2>
+            
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">
+                  Claim ID
+                </h3>
+                <p className="text-gray-900 dark:text-gray-300">
+                  {claim.claimData.id}
+                </p>
+              </div>
 
-            <div>
-              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">
-                Submission Date
-              </h3>
-              <p className="text-gray-900 dark:text-gray-300">
-                {claim.claimData.date}
-              </p>
-            </div>
+              <div>
+                <h3 className="text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">
+                  Submission Date
+                </h3>
+                <p className="text-gray-900 dark:text-gray-300">
+                  {claim.claimData.date}
+                </p>
+              </div>
 
               <div>
                 <h3 className="text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">
@@ -183,22 +136,22 @@ const ClaimDetails = () => {
                   {claim.claimData.status}
                 </p>
               </div>
-              
             </div>
           </div>
         </div>
+
+        <audio
+          ref={audioRef}
+          src={claim.audioUrl}
+          onEnded={() => {
+            setIsPlaying(false);
+            clearInterval(progressInterval.current);
+            setProgress(0);
+          }}
+        />
       </div>
-      <audio
-        ref={audioRef}
-        src={claim.audioUrl}
-        onEnded={() => {
-          setIsPlaying(false);
-          clearInterval(progressInterval.current);
-          setProgress(0);
-        }}
-      />
     </>
-  )
+  );
 };
 
 export default ClaimDetails;

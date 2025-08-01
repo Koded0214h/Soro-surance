@@ -31,7 +31,7 @@ SECRET_KEY = 'django-insecure-a^=0hl)h^^(*dow@=hje0o2%rnt4d3yff+gdoshaurknxu!8_f
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['soro-surance-backend.onrender.com']
+ALLOWED_HOSTS = ['soro-surance-backend.onrender.com', '127.0.0.1']
 
 ASSEMBLYAI_API_KEY = os.getenv('ASSEMBLYAI_API_KEY')
 

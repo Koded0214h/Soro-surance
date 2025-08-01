@@ -1,4 +1,3 @@
-// Listening.js
 import React, { useState, useRef, useEffect } from 'react';
 import { FaMicrophone, FaCheck } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
@@ -75,7 +74,9 @@ const Listening = () => {
   const stopRecording = () => {
     if (mediaRecorderRef.current) {
       mediaRecorderRef.current.stop();
-      mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+      if (mediaRecorderRef.current.stream) {
+        mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+      }
     }
     if (recognitionRef.current) {
       recognitionRef.current.stop();
@@ -118,7 +119,6 @@ const Listening = () => {
       <Navbar />
       <div style={{
         minHeight: '100vh',
-        background: 'black',
         color: 'white',
         display: 'flex',
         flexDirection: 'column',

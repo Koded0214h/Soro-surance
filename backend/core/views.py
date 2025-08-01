@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status, generics
-from rest_framework.permissions import AllowAny, IsAdminUser
+from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 import requests, time
 import os
 
@@ -126,6 +126,14 @@ class AdminClaimListView(generics.ListAPIView):
     queryset = Claim.objects.all().order_by('-created_at')
     serializer_class = ClaimSerializer
     permission_classes = [IsAdminUser]
+
+class UserClaimListView(generics.ListAPIView):
+    serializer_class = ClaimSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        return Claim.objects.filter(submitted_by=user).order_by('-created_at')
     
 class AdminClaimUpdateView(generics.UpdateAPIView):
     queryset = Claim.objects.all()

@@ -16,7 +16,7 @@ filelock==3.13.1
 fsspec==2023.6.0
 google-api-core==2.17.1
 google-auth==2.27.0
-google-cloud-speech==2.33.0
+
 googleapis-common-protos==1.62.0
 googletrans==4.0.0rc1
 grpcio==1.59.0
@@ -24,7 +24,7 @@ grpcio-status==1.59.0
 gunicorn==21.2.0
 h11==0.14.0
 httpcore==0.17.3
-httpx==0.25.0
+httpx==0.13.3
 idna==3.7
 inflection==0.5.1
 Jinja2==3.1.3
@@ -37,7 +37,6 @@ numba==0.58.1
 numpy==1.26.4
 
 # Whisper: stable + compatible
-openai-whisper==20230314
 
 packaging==23.2
 proto-plus==1.22.3
@@ -45,7 +44,7 @@ protobuf==4.25.1
 psycopg2-binary==2.9.9
 pyasn1==0.5.1
 pyasn1_modules==0.3.0
-pydub==0.25.1
+
 PyJWT==2.8.0
 python-decouple==3.8
 python-dotenv==1.0.1

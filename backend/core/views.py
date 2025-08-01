@@ -5,11 +5,14 @@ from rest_framework import status, generics
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 import requests, time
 import os
-
+import uuid
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.contrib.auth import get_user_model
+
+from google.cloud import speech_v1p1beta1 as speech
+from google.cloud import language_v1
 
 from .serializers import (
     RegisterSerializer, ClaimSerializer,
@@ -21,6 +24,63 @@ from .models import (
 from .utils.send_email import send_claim_confirmation_email
 
 User = get_user_model()
+
+class VoiceClaimView(APIView):
+    parser_classes = [MultiPartParser, FormParser]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        audio_file = request.FILES.get('audio')
+        if not audio_file:
+            return Response({'error': 'No audio file provided.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Save audio file to media directory with unique name
+        filename = f"voice_claims/{uuid.uuid4()}.webm"
+        file_path = os.path.join(settings.MEDIA_ROOT, filename)
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        with open(file_path, 'wb+') as destination:
+            for chunk in audio_file.chunks():
+                destination.write(chunk)
+
+        # Google Speech-to-Text transcription
+        client = speech.SpeechClient()
+        with open(file_path, 'rb') as audio:
+            content = audio.read()
+
+        audio_google = speech.RecognitionAudio(content=content)
+        config = speech.RecognitionConfig(
+            encoding=speech.RecognitionConfig.AudioEncoding.WEBM_OPUS,
+            sample_rate_hertz=48000,
+            language_code="en-US",
+            enable_automatic_punctuation=True,
+        )
+
+        response = client.recognize(config=config, audio=audio_google)
+        transcript = ""
+        for result in response.results:
+            transcript += result.alternatives[0].transcript
+
+        # Google Natural Language API (Gemini) for categorization
+        language_client = language_v1.LanguageServiceClient()
+        document = language_v1.Document(content=transcript, type_=language_v1.Document.Type.PLAIN_TEXT)
+        classification_response = language_client.classify_text(request={'document': document})
+        categories = [category.name for category in classification_response.categories]
+
+        # Create claim with extracted info
+        claim = Claim.objects.create(
+            submitted_by=request.user,
+            voice_transcript=transcript,
+            claim_type=categories[0] if categories else "Uncategorized",
+            status="pending"
+        )
+
+        # Return response with claim info and transcript
+        return Response({
+            "claim_id": claim.claim_id,
+            "transcription": transcript,
+            "categories": categories,
+            "message": "Claim created successfully."
+        }, status=status.HTTP_201_CREATED)
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()

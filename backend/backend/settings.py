@@ -165,6 +165,8 @@ AUTH_USER_MODEL = 'core.User'
 
 CORS_ALLOW_ALL_ORIGINS = True 
 
+# Google Cloud API credentials path
+GOOGLE_APPLICATION_CREDENTIALS = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
 
 # For development (prints email to console)
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

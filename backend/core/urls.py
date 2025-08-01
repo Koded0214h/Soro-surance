@@ -11,6 +11,7 @@ urlpatterns = [
     path('claims/track/', views.TrackClaimView.as_view(), name='claim-track'),
     path('admin/claims/<int:id>/', views.AdminClaimUpdateView.as_view(), name='admin-claim-update'),
     path('claims/voice/', views.VoiceToTextView.as_view(), name='voice-to-text'),
+    path('claims/voice-claim/', views.VoiceClaimView.as_view(), name='voice-claim'),
     path('claims/<str:claim_id>/upload/', views.AttachmentUploadView.as_view(), name='upload-attachment'),
     path('user/claims/', views.UserClaimListView.as_view(), name='user-claim-list'),
     path('user/profile/', views.UserProfileView.as_view(), name='user-profile'),

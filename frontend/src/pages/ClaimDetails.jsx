@@ -93,7 +93,6 @@ const ClaimDetails = () => {
         <Navbar />
         <p>No claim data found. Please submit a claim first.</p>
       </div>
-      </>
     );
   }
 
@@ -188,7 +187,7 @@ const ClaimDetails = () => {
             </div>
           </div>
         </div>
-
+      </div>
       <audio
         ref={audioRef}
         src={claim.audioUrl}
@@ -199,7 +198,7 @@ const ClaimDetails = () => {
         }}
       />
     </>
-  );
+  )
 };
 
 export default ClaimDetails;

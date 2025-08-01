@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { FaMicrophone, FaCheck } from 'react-icons/fa';
 import { SyncLoader } from 'react-spinners';
 import Navbar from '../component/Navbar';
+import api from '../api';
+import { useNavigate } from 'react-router-dom';
 
 const Listening = () => {
   const [isListening, setIsListening] = useState(false);
@@ -12,6 +14,7 @@ const Listening = () => {
   const [isTranscribing, setIsTranscribing] = useState(false);
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
+  const navigate = useNavigate();
 
   // useEffect for handling microphone access and cleanup
   useEffect(() => {
@@ -24,11 +27,39 @@ const Listening = () => {
     };
   }, []);
 
+  const submitForTranscription = async (audioBlob) => {
+    setIsTranscribing(true);
+    setStatusText('Transcribing audio...');
+
+    const formData = new FormData();
+    // Use the correct filename and MIME type for webm format
+    formData.append('audio', audioBlob, 'recording.webm');
+
+    try {
+      // Use the 'api' object from your provided code to post to the backend
+      const response = await api.post('/claims/voice/', formData);
+
+      setTranscription(response.data.transcription);
+      setStatusText('Transcription complete');
+      // Optionally handle categories and claim_id here
+      console.log('Categories:', response.data.categories);
+      console.log('Claim ID:', response.data.claim_id);
+    } catch (err) {
+      console.error('Error during transcription:', err);
+      setStatusText('Transcription failed. Please try again.');
+    } finally {
+      setIsTranscribing(false);
+    }
+  };
+
   const startRecording = async () => {
     try {
       // Request access to the user's microphone
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      mediaRecorderRef.current = new MediaRecorder(stream);
+      
+      // --- FIX: Explicitly request WebM format, as it is widely supported
+      const options = { mimeType: 'audio/webm' };
+      mediaRecorderRef.current = new MediaRecorder(stream, options);
       audioChunksRef.current = [];
 
       // Event listener to collect audio data chunks
@@ -38,6 +69,7 @@ const Listening = () => {
 
       // Event listener for when recording stops - this now triggers transcription
       mediaRecorderRef.current.onstop = () => {
+        // --- FIX: Create the blob with the correct type
         const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
         setAudioBlob(blob);
         submitForTranscription(blob);
@@ -73,41 +105,6 @@ const Listening = () => {
       setConfirmed(false);
       setAudioBlob(null);
       startRecording();
-    }
-  };
-
-  const submitForTranscription = async (audioBlob) => {
-    setIsTranscribing(true);
-    setStatusText('Transcribing audio...');
-
-    const formData = new FormData();
-    formData.append('audio', audioBlob, 'audio.webm');
-
-    try {
-      const response = await fetch('/api/claims/voice-claim/', {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to transcribe audio');
-      }
-
-      const data = await response.json();
-
-      setTranscription(data.transcription);
-      setStatusText('Transcription complete');
-      // Optionally handle categories and claim_id here
-      console.log('Categories:', data.categories);
-      console.log('Claim ID:', data.claim_id);
-    } catch (err) {
-      console.error('Error during transcription:', err);
-      setStatusText('Transcription failed. Please try again.');
-    } finally {
-      setIsTranscribing(false);
     }
   };
   

@@ -1,18 +1,21 @@
+import logging
+import time
+import requests
+import io
+import datetime
+import os # Import the os module for API keys
+import json # Import json to handle the LLM's response
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
+from django.conf import settings
+from django.core.files.uploadedfile import InMemoryUploadedFile
+import uuid
 from rest_framework import status, generics
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
-import requests, time
-import os
-import uuid
-from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.contrib.auth import get_user_model
-
-from google.cloud import speech_v1p1beta1 as speech
-from google.cloud import language_v1
 
 from .serializers import (
     RegisterSerializer, ClaimSerializer,
@@ -25,115 +28,168 @@ from .utils.send_email import send_claim_confirmation_email
 
 User = get_user_model()
 
-class VoiceClaimView(APIView):
-    parser_classes = [MultiPartParser, FormParser]
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request):
-        audio_file = request.FILES.get('audio')
-        if not audio_file:
-            return Response({'error': 'No audio file provided.'}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Save audio file to media directory with unique name
-        filename = f"voice_claims/{uuid.uuid4()}.webm"
-        file_path = os.path.join(settings.MEDIA_ROOT, filename)
-        os.makedirs(os.path.dirname(file_path), exist_ok=True)
-        with open(file_path, 'wb+') as destination:
-            for chunk in audio_file.chunks():
-                destination.write(chunk)
-
-        # Google Speech-to-Text transcription
-        client = speech.SpeechClient()
-        with open(file_path, 'rb') as audio:
-            content = audio.read()
-
-        audio_google = speech.RecognitionAudio(content=content)
-        config = speech.RecognitionConfig(
-            encoding=speech.RecognitionConfig.AudioEncoding.WEBM_OPUS,
-            sample_rate_hertz=48000,
-            language_code="en-US",
-            enable_automatic_punctuation=True,
-        )
-
-        response = client.recognize(config=config, audio=audio_google)
-        transcript = ""
-        for result in response.results:
-            transcript += result.alternatives[0].transcript
-
-        # Google Natural Language API (Gemini) for categorization
-        language_client = language_v1.LanguageServiceClient()
-        document = language_v1.Document(content=transcript, type_=language_v1.Document.Type.PLAIN_TEXT)
-        classification_response = language_client.classify_text(request={'document': document})
-        categories = [category.name for category in classification_response.categories]
-
-        # Create claim with extracted info
-        claim = Claim.objects.create(
-            submitted_by=request.user,
-            voice_transcript=transcript,
-            claim_type=categories[0] if categories else "Uncategorized",
-            status="pending"
-        )
-
-        # Return response with claim info and transcript
-        return Response({
-            "claim_id": claim.claim_id,
-            "transcription": transcript,
-            "categories": categories,
-            "message": "Claim created successfully."
-        }, status=status.HTTP_201_CREATED)
-
-class RegisterView(generics.CreateAPIView):
-    queryset = User.objects.all()
-    serializer_class = RegisterSerializer
 
 class VoiceToTextView(APIView):
     parser_classes = [MultiPartParser, FormParser]
 
     def post(self, request):
-        audio_file = request.FILES.get('audio')
-        if not audio_file:
-            return Response({'error': 'No audio file provided.'}, status=400)
+        try:
+            audio_file = request.FILES.get('audio')
+            if not isinstance(audio_file, InMemoryUploadedFile):
+                return Response({'error': 'No valid audio file provided.'}, status=400)
 
-        headers = {
-            "authorization": settings.ASSEMBLYAI_API_KEY,
-        }
+            api_key = getattr(settings, 'ASSEMBLYAI_API_KEY', None)
+            if not api_key:
+                return Response({'error': 'AssemblyAI API key not configured.'}, status=500)
+            
+            gemini_api_key = os.environ.get('GEMINI_API_KEY', '') # Get Gemini API key from environment variables
+            if not gemini_api_key:
+                logging.error("GEMINI_API_KEY not found in environment variables.")
+                return Response({'error': 'Gemini API key not configured.'}, status=500)
 
-        # Upload audio file to AssemblyAI
-        upload_response = requests.post(
-            'https://api.assemblyai.com/v2/upload',
-            headers=headers,
-            files={'file': audio_file}
-        )
+            # Headers for AssemblyAI
+            headers = {
+                "authorization": api_key,
+                "content-type": "application/octet-stream"
+            }
+            
+            # Read the audio file directly without any processing
+            audio_data = audio_file.read()
 
-        if upload_response.status_code != 200:
-            return Response({'error': 'Failed to upload audio.'}, status=500)
+            # Upload audio file to AssemblyAI
+            upload_response = requests.post(
+                'https://api.assemblyai.com/v2/upload',
+                headers=headers,
+                data=audio_data
+            )
 
-        upload_url = upload_response.json().get('upload_url')
+            if upload_response.status_code != 200:
+                logging.error(f"AssemblyAI upload failed: {upload_response.text}")
+                return Response({'error': 'Failed to upload audio.'}, status=500)
 
-        # Start transcription
-        transcribe_response = requests.post(
-            'https://api.assemblyai.com/v2/transcript',
-            json={"audio_url": upload_url},
-            headers=headers
-        )
+            upload_url = upload_response.json().get('upload_url')
 
-        transcript_id = transcribe_response.json().get('id')
-        if not transcript_id:
-            return Response({'error': 'Transcription request failed.'}, status=500)
-
-        # Polling for result
-        while True:
-            poll_response = requests.get(
-                f'https://api.assemblyai.com/v2/transcript/{transcript_id}',
+            # Start transcription
+            transcribe_response = requests.post(
+                'https://api.assemblyai.com/v2/transcript',
+                json={"audio_url": upload_url},
                 headers=headers
-            ).json()
+            )
 
-            if poll_response['status'] == 'completed':
-                return Response({'transcript': poll_response['text']}, status=200)
-            elif poll_response['status'] == 'error':
-                return Response({'error': 'Transcription failed.'}, status=500)
+            transcript_id = transcribe_response.json().get('id')
+            if not transcript_id:
+                logging.error(f"AssemblyAI transcription request failed: {transcribe_response.text}")
+                return Response({'error': 'Transcription request failed.'}, status=500)
 
-            time.sleep(2)
+            # Polling for result
+            while True:
+                # Use a new header for the GET request
+                poll_headers = {"authorization": api_key}
+                poll_response = requests.get(
+                    f'https://api.assemblyai.com/v2/transcript/{transcript_id}',
+                    headers=poll_headers
+                ).json()
+
+                if poll_response['status'] == 'completed':
+                    transcript_text = poll_response['text']
+                    
+                    # --- NEW: Use Gemini LLM to extract claim details from the transcript ---
+                    
+                    # Define the prompt and JSON schema for the LLM
+                    prompt = f"""
+                    Extract the following information from the claim transcript:
+                    1. A concise summary of the incident (description).
+                    2. The type of claim.
+                    3. The location of the incident.
+
+                    Transcript: "{transcript_text}"
+
+                    Available claim types are: 'auto', 'fire', 'health', 'theft', 'other'. If a type is not clearly stated, default to 'other'.
+                    The location can be a general area or a specific address.
+                    """
+
+                    # Define the schema for the LLM's response
+                    generation_config = {
+                        "responseMimeType": "application/json",
+                        "responseSchema": {
+                            "type": "OBJECT",
+                            "properties": {
+                                "description": {"type": "STRING"},
+                                "claim_type": {"type": "STRING"},
+                                "location": {"type": "STRING"}
+                            }
+                        }
+                    }
+
+                    llm_headers = {
+                        "Content-Type": "application/json"
+                    }
+                    llm_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key={gemini_api_key}"
+                    llm_payload = {
+                        "contents": [{"parts": [{"text": prompt}]}],
+                        "generationConfig": generation_config
+                    }
+                    
+                    try:
+                        llm_response = requests.post(llm_url, headers=llm_headers, data=json.dumps(llm_payload))
+                        llm_response.raise_for_status() # Raise an exception for bad status codes
+                        llm_data = llm_response.json()
+                        
+                        # Extract the JSON string from the LLM's response and parse it
+                        extracted_json = llm_data['candidates'][0]['content']['parts'][0]['text']
+                        extracted_details = json.loads(extracted_json)
+
+                        extracted_description = extracted_details.get('description', '')
+                        extracted_claim_type = extracted_details.get('claim_type', 'other')
+                        extracted_location = extracted_details.get('location', 'Unspecified')
+
+                    except (requests.RequestException, KeyError, json.JSONDecodeError) as e:
+                        logging.error(f"LLM extraction failed: {e}")
+                        # Fallback to default values in case of an error
+                        extracted_description = transcript_text
+                        extracted_claim_type = 'other'
+                        extracted_location = 'Unspecified'
+
+                    # --- END LLM extraction ---
+
+                    # Create claim with extracted info
+                    # NOTE: Assuming a 'Claim' model exists.
+                    # from .models import Claim 
+                    claim = Claim.objects.create(
+                        user=request.user if request.user.is_authenticated else None, # Set the user
+                        submitted_by=request.user if request.user.is_authenticated else None,
+                        voice_transcript=transcript_text,
+                        description=extracted_description, # Use the extracted description
+                        claim_type=extracted_claim_type, # Use the extracted claim type
+                        location=extracted_location, # Use the extracted location
+                        status="pending",
+                        incident_date=datetime.date.today() # Add the current date
+                    )
+
+                    return Response({
+                        "claim_id": claim.claim_id,  # Use the actual claim ID
+                        "transcription": transcript_text,
+                        "description": extracted_description,
+                        "claim_type": extracted_claim_type,
+                        "location": extracted_location,
+                        "message": "Claim created successfully."
+                    }, status=200)
+
+                elif poll_response['status'] == 'error':
+                    logging.error(f"AssemblyAI transcription failed: {poll_response}")
+                    return Response({'error': 'Transcription failed.'}, status=500)
+
+                time.sleep(2)
+        except Exception as e:
+            logging.exception("Exception in VoiceToTextView:")
+            return Response({'error': str(e)}, status=500)
+
+
+
+
+class RegisterView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = RegisterSerializer
 
 class ClaimCreateView(generics.CreateAPIView):
     queryset = Claim.objects.all()

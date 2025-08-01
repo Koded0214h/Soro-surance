@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }) => {
       const accessToken = response.data.access;
       localStorage.setItem("access_token", accessToken);
       setUser({ email });
-      navigate("/dashboard");
+      navigate("/udash");
     } catch (err) {
       setError(err.response?.data?.detail || "Login failed");
       setUser(null);

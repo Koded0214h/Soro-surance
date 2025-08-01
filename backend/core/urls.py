@@ -13,6 +13,7 @@ urlpatterns = [
     path('claims/voice/', views.VoiceToTextView.as_view(), name='voice-to-text'),
     path('claims/<str:claim_id>/upload/', views.AttachmentUploadView.as_view(), name='upload-attachment'),
     path('user/claims/', views.UserClaimListView.as_view(), name='user-claim-list'),
+    path('user/profile/', views.UserProfileView.as_view(), name='user-profile'),
     
     path('auth/register/', views.RegisterView.as_view(), name='register'),
     path('auth/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),

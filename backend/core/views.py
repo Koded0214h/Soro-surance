@@ -134,6 +134,16 @@ class UserClaimListView(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
         return Claim.objects.filter(submitted_by=user).order_by('-created_at')
+
+class UserProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        return Response({
+            "full_name": user.full_name,
+            "email": user.email,
+        })
     
 class AdminClaimUpdateView(generics.UpdateAPIView):
     queryset = Claim.objects.all()

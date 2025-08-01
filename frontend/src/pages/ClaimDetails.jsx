@@ -3,7 +3,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { FiPlay, FiPause, FiRefreshCw } from 'react-icons/fi';
 import { useLocation } from 'react-router-dom';
 import Navbar from '../component/Navbar';
-
 const ClaimDetails = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -41,16 +40,18 @@ const ClaimDetails = () => {
 
   if (!claim) {
     return (
-      <div className="dark:bg-gray-900 min-h-screen flex items-center justify-center">
-        <Navbar />
+      <>
+      <Navbar />
+      <div className="dark:bg-gray-900 min-h-screen flex items-center justify-center text-2xl">
         <p>No claim data found. Please submit a claim first.</p>
       </div>
+      </>
     );
   }
 
   return (
     <>
-      <Navbar />
+    <Navbar />
       <div className="dark:bg-gray-900 min-h-screen">
         <div className="pt-20 px-8 flex flex-col lg:flex-row gap-8">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md flex-1">
@@ -135,7 +136,6 @@ const ClaimDetails = () => {
                   {claim.claimData.status}
                 </p>
               </div>
-              
             </div>
           </div>
         </div>

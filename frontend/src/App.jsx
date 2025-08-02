@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
 import Auth from "./pages/Auth";
 import Landing from "./pages/Landing";
@@ -33,115 +33,113 @@ const PrivateRoute = ({ children }) => {
 
 function App() {
   return (
-    <Router>
-      <AuthProvider>
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route
-            path="/dashboard"
-            element={
-              <PrivateRoute>
-                <Dashboard />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/notifications"
-            element={
-              <PrivateRoute>
-                <Notifications />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/user"
-            element={
-              <PrivateRoute>
-                <UserManagement />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/details"
-            element={
-                <ClaimDetails />
-            }
-          />
-          <Route
-            path="/claimd"
-            element={
-              <PrivateRoute>
-                <ClaimDashboard />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/settings"
-            element={
-              <PrivateRoute>
-                <Settings />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/claimp"
-            element={
-              <PrivateRoute>
-                <ClaimsPage />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/listen"
-            element={
-                <Listening />
-            }
-          />
-          <Route
-            path="/udash"
-            element={
-              <PrivateRoute>
-                <Udashboard />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/claimstatus"
-            element={
-              <PrivateRoute>
-                <ClaimStatus />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/reg"
-            element={
-              <PrivateRoute>
-                <Registration />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/support"
-            element={
-              <PrivateRoute>
-                <SupportPage />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/adminauth"
-            element={
-              <PrivateRoute>
-                <AdminAuth />
-              </PrivateRoute>
-            }
-          />
-          <Route path="*" element={<Navigate to="/auth" replace />} />
-        </Routes>
-      </AuthProvider>
-    </Router>
+    <AuthProvider>
+      <Routes>
+        <Route path="/" element={<Landing />} />
+        <Route path="/auth" element={<Auth />} />
+        <Route
+          path="/dashboard"
+          element={
+            <PrivateRoute>
+              <Dashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/notifications"
+          element={
+            <PrivateRoute>
+              <Notifications />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/user"
+          element={
+            <PrivateRoute>
+              <UserManagement />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/details"
+          element={
+            <ClaimDetails />
+          }
+        />
+        <Route
+          path="/claimd"
+          element={
+            <PrivateRoute>
+              <ClaimDashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <PrivateRoute>
+              <Settings />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/claimp"
+          element={
+            <PrivateRoute>
+              <ClaimsPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/listen"
+          element={
+            <Listening />
+          }
+        />
+        <Route
+          path="/udash"
+          element={
+            <PrivateRoute>
+              <Udashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/claimstatus"
+          element={
+            <PrivateRoute>
+              <ClaimStatus />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/reg"
+          element={
+            <PrivateRoute>
+              <Registration />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/support"
+          element={
+            <PrivateRoute>
+              <SupportPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/adminauth"
+          element={
+            <PrivateRoute>
+              <AdminAuth />
+            </PrivateRoute>
+          }
+        />
+        <Route path="*" element={<Navigate to="/auth" replace />} />
+      </Routes>
+    </AuthProvider>
   );
 }
 

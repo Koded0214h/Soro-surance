@@ -30,7 +30,7 @@
     </div>
 
     {% if is_anonymous %}
-    <p>You submitted this claim as a guest. Please <a href="https://your-domain.com/login">log in</a> to track your claim in the future.</p>
+    <p>You submitted this claim as a guest. Please <Link to="https://your-domain.com/login">log in</a> to track your claim in the future.</p>
     {% else %}
     <p>You can track the claim using the button below:</p>
     <a class="button" href="https://your-domain.com/track?claim_id={{ claim.claim_id }}">Track Your Claim</a>

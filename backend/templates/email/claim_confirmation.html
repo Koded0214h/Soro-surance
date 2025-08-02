@@ -17,11 +17,11 @@
 
         <p>You can track your claim status using the link below:</p>
 
-        <a href="{{ tracker_url }}" style="display:inline-block; background: #4CAF50; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none;">Track My Claim</a>
+        <Link to="{{ tracker_url }}" style="display:inline-block; background: #4CAF50; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none;">Track My Claim</a>
 
         {% if is_guest %}
         <p style="margin-top: 20px; color: #999;">
-            You submitted as a guest. <strong><a href="https://claimwhisperer.com/login">Login or Register</a></strong> to easily manage and receive updates on your claims.
+            You submitted as a guest. <strong><Link to="https://claimwhisperer.com/login">Login or Register</a></strong> to easily manage and receive updates on your claims.
         </p>
         {% endif %}
 

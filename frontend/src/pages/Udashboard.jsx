@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { FiFileText, FiClock, FiCheck, FiX } from 'react-icons/fi';
+import { Link } from 'react-router-dom';
 import Navbar from '../component/Navbar';
 import api from '../api';
 
@@ -64,11 +65,11 @@ export default function Udashboard() {
             <FiFileText className="text-orange-500 mr-2" /> Quick Actions
           </h2>
           <div className="flex flex-wrap gap-4">
-            <a href="/listen">
+            <Link to="/listen">
               <button className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg flex items-center">
                 <FiFileText className="mr-2" /> File New Claim
               </button>
-            </a>
+            </Link>
             <button className="border border-orange-500 text-orange-500 hover:bg-orange-50 px-6 py-3 rounded-lg">
               View Policy Documents
             </button>

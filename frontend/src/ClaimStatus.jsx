@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FiClock, FiCheckCircle, FiAlertTriangle, FiFileText, FiDownload, FiInfo } from 'react-icons/fi';
 import Navbar from './component/Navbar';
 import { SyncLoader } from 'react-spinners';
+import { Link } from 'react-router-dom';
 import api from './api'; // Assuming a similar API setup to the one you provided
 
 
@@ -165,14 +166,14 @@ const ClaimStatus = () => {
                         </h4>
                         <div className="flex flex-wrap gap-2">
                           {claim.documents.map((doc, i) => (
-                            <a 
+                            <Link
                               key={i} 
                               href="#" 
                               className="flex items-center text-sm bg-white px-3 py-1 rounded border border-gray-200 hover:bg-gray-100"
                             >
                               {doc}
                               <FiDownload className="ml-2 text-gray-400" size={14} />
-                            </a>
+                            </Link>
                           ))}
                         </div>
                       </div>

@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from 'react-router-dom';
 
 const Registration = () => {
   return (
@@ -10,7 +11,7 @@ const Registration = () => {
         
         <div className="space-y-6 gap-10">
           {/* User Button */}
-          <a href="/auth"> 
+          <Link to="/auth"> 
           <button className="bg-orange-100 mb-5 hover:bg-orange-200 w-full p-4 rounded-md flex items-center justify-between transition-colors border-2 border-transparent hover:border-orange-300">
             
             <div className="flex items-center">
@@ -27,10 +28,10 @@ const Registration = () => {
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
             </svg>
-          </button></a>
+          </button></Link>
 
           {/* Admin Button */}
-          <a href="/dashboard">
+          <Link to="/dashboard">
           <button className="bg-orange-100 hover:bg-orange-200 w-full p-4 rounded-md flex items-center justify-between transition-colors border-2 border-transparent hover:border-orange-300">
             <div className="flex items-center">
               <div className="bg-orange-500 text-white p-2 rounded-full mr-4">
@@ -47,7 +48,7 @@ const Registration = () => {
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
             </svg>
-          </button></a>
+          </button></Link>
         </div>
       </div>
       

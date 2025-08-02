@@ -1,6 +1,7 @@
 import React, { useState, useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AuthContext } from "../context/AuthContext";
+import { Link } from 'react-router-dom';
 
 const Auth = () => {
   const { login, register, error, setError } = useContext(AuthContext);
@@ -154,9 +155,9 @@ const Auth = () => {
                 </div>
 
                 <div className="flex justify-center">
-                  <a href="#" className="text-sm text-orange-600 hover:text-orange-700 hover:underline mb-4">
+                  <Link to="#" className="text-sm text-orange-600 hover:text-orange-700 hover:underline mb-4">
                     Forgot Password?
-                  </a>
+                  </Link>
                 </div>
 
                 {error && (

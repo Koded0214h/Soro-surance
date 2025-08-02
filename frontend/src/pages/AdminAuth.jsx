@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { FiLock, FiMail, FiEye, FiEyeOff, FiArrowRight } from "react-icons/fi";
+import { Link } from 'react-router-dom';
 
 const AdminAuth = () => {
   const [email, setEmail] = useState("");
@@ -113,13 +114,13 @@ const AdminAuth = () => {
               </div>
 
               <div>
-                <a href="/dashboard">
+                <Link to="/dashboard">
                 <button
                   type="submit"
                   className="w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 >
                   Sign in <FiArrowRight className="ml-2" />
-                </button></a>
+                </button></Link>
               </div>
             </form>
           ) : (

@@ -12,21 +12,21 @@ const Navbar = () => {
 
           {/* Right-aligned navigation links */}
           <div className="flex space-x-8">
-            <a href="udash" className="text-orange-700 text-md font-medium hover:text-orange-600">
+            <Link to="udash" className="text-orange-700 text-md font-medium hover:text-orange-600">
               Dashboard
-            </a>
-            <a href="/claimd" className="text-orange-700 text-md font-medium hover:text-orange-600">
+            </Link>
+            <Link to="/claimd" className="text-orange-700 text-md font-medium hover:text-orange-600">
               Claims
-            </a>
-            <a href="/claimstatus" className="text-orange-700 text-md font-medium hover:text-orange-600">
+            </Link>
+            <Link to="/claimstatus" className="text-orange-700 text-md font-medium hover:text-orange-600">
               Track Claim
-            </a>
-            <a href="/notifications" className="text-orange-700 text-md font-medium hover:text-orange-600">
+            </Link>
+            <Link to="/notifications" className="text-orange-700 text-md font-medium hover:text-orange-600">
               Activity
-            </a>
-            <a href="/support" className="text-orange-700 text-md font-medium hover:text-orange-600">
+            </Link>
+            <Link to="/support" className="text-orange-700 text-md font-medium hover:text-orange-600">
             Support
-            </a>
+            </Link>
           </div>
         </div>
       </div>

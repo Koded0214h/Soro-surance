@@ -23,9 +23,9 @@ const App = () => {
             Soro surance
           </div>
           <div className="flex items-center space-x-6 mt-4 md:mt-0">
-            <a href="#" className="text-[#292929] hover:text-[#0047AB] font-medium transition-colors">For Insurers</a>
-            <a href="#" className="text-[#292929] hover:text-[#0047AB] font-medium transition-colors">For Users</a>
-            <a href="#" className="text-[#292929] hover:text-[#0047AB] font-medium transition-colors">About Us</a>
+            <Link to="#" className="text-[#292929] hover:text-[#0047AB] font-medium transition-colors">For Insurers</Link>
+            <Link to="#" className="text-[#292929] hover:text-[#0047AB] font-medium transition-colors">For Users</Link>
+            <Link to="#" className="text-[#292929] hover:text-[#0047AB] font-medium transition-colors">About Us</Link>
             <Link  to="/reg" className="bg-[#FF6600] text-white font-medium py-2 px-6 rounded-md shadow-lg hover:bg-[#E55B00] transition-colors">Get Started</Link>
           </div>
         </nav>
@@ -42,7 +42,7 @@ const App = () => {
             <p className="text-lg md:text-xl">
               Claim Whisper is an innovative platform that simplifies insurance claims for both companies and users. Submit claims using voice in local Nigerian languages, powered by advanced AI.
             </p>
-            <a href="/reg" className="bg-[#FF6600] text-white font-medium py-3 px-8 rounded-lg shadow-lg hover:bg-[#E55B00] transition-colors">Get Started</a>
+            <Link to="/reg" className="bg-[#FF6600] text-white font-medium py-3 px-8 rounded-lg shadow-lg hover:bg-[#E55B00] transition-colors">Get Started</Link>
           </div>
           <div className="relative z-10 hidden md:flex items-center justify-center">
             {/* Placeholder for the illustration with the text "INSURANCE" */}
@@ -118,9 +118,9 @@ const App = () => {
           <p className="text-lg max-w-2xl mx-auto mb-8">
             Join Claim Whisper today and experience the future of insurance claim management.
           </p>
-          <a href="/reg" className="bg-[#FF6600] text-white font-medium py-3 px-8 rounded-lg shadow-lg hover:bg-[#E55B00] transition-colors">
+          <Link to="/reg" className="bg-[#FF6600] text-white font-medium py-3 px-8 rounded-lg shadow-lg hover:bg-[#E55B00] transition-colors">
             Get Started
-          </a>
+          </Link>
         </div>
       </section>
 
@@ -129,9 +129,9 @@ const App = () => {
         <div className="container mx-auto px-4 text-center text-sm md:text-left">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="flex space-x-6">
-              <a href="#" className="hover:text-[#FF6600] transition-colors">Privacy Policy</a>
-              <a href="#" className="hover:text-[#FF6600] transition-colors">Terms of Service</a>
-              <a href="#" className="hover:text-[#FF6600] transition-colors">Contact Us</a>
+              <Link to="#" className="hover:text-[#FF6600] transition-colors">Privacy Policy</Link>
+              <Link to="#" className="hover:text-[#FF6600] transition-colors">Terms of Service</Link>
+              <Link to="#" className="hover:text-[#FF6600] transition-colors">Contact Us</Link>
             </div>
             <div>
               &copy; 2024 Claim Whisper. All rights reserved.

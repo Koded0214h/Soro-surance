@@ -1,6 +1,7 @@
 import React from "react";
 import { FiMail, FiPhone, FiMessageSquare, FiHelpCircle, FiChevronDown } from "react-icons/fi";
 import Navbar from "../component/Navbar";
+import { Link } from 'react-router-dom';
 
 const SupportPage = () => {
   const faqs = [
@@ -69,7 +70,7 @@ const SupportPage = () => {
             </div>
             <h3 className="font-medium text-gray-900 mb-2">Email Us</h3>
             <p className="text-gray-600 mb-4">Get a response within 24 hours</p>
-            <a href="mailto:support@yourdomain.com" className="text-orange-600 font-medium hover:underline">sorosurance@gmail.com</a>
+            <Link to="mailto:support@yourdomain.com" className="text-orange-600 font-medium hover:underline">sorosurance@gmail.com</Link>
           </div>
 
           <div className="bg-white p-6 rounded-lg shadow-sm text-center border border-gray-200">
@@ -78,7 +79,7 @@ const SupportPage = () => {
             </div>
             <h3 className="font-medium text-gray-900 mb-2">Call Us</h3>
             <p className="text-gray-600 mb-4">Mon-Fri, 9am-5pm EST</p>
-            <a href="tel:+18005551234" className="text-orange-600 font-medium hover:underline">+234 704 4523 964</a>
+            <Link to="tel:+18005551234" className="text-orange-600 font-medium hover:underline">+234 704 4523 964</Link>
           </div>
 
           <div className="bg-white p-6 rounded-lg shadow-sm text-center border border-gray-200">
@@ -97,10 +98,10 @@ const SupportPage = () => {
             <FiHelpCircle className="mr-2 text-orange-600" /> Additional Resources
           </h2>
           <div className="grid sm:grid-cols-2 gap-4">
-            <a href="#" className="text-orange-600 hover:underline">Help Center</a>
-            <a href="#" className="text-orange-600 hover:underline">Community Forum</a>
-            <a href="#" className="text-orange-600 hover:underline">Video Tutorials</a>
-            <a href="#" className="text-orange-600 hover:underline">API Documentation</a>
+            <Link to="#" className="text-orange-600 hover:underline">Help Center</Link>
+            <Link to="#" className="text-orange-600 hover:underline">Community Forum</Link>
+            <Link to="#" className="text-orange-600 hover:underline">Video Tutorials</Link>
+            <Link to="#" className="text-orange-600 hover:underline">API Documentation</Link>
           </div>
         </div>
       </div>

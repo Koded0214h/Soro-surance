@@ -1,10 +1,10 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  base: './', // 👈 This is crucial for Vercel static deploy
   build: {
     outDir: 'dist'
-  }
-})
+  },
+  base: './' // ensures proper path resolving in deployed static environment
+});

@@ -1,7 +1,6 @@
 {
   "buildCommand": "npm install && npm run build",
   "outputDirectory": "frontend/dist",
-  "rootDirectory": "frontend",
   "framework": null,
   "cleanUrls": true,
   "trailingSlash": false,

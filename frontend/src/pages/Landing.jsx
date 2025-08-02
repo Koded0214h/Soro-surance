@@ -1,5 +1,6 @@
 import React from 'react';
 import { Lock, Mic, Clock, FileText, Headphones, CheckCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const App = () => {
   // A reusable component for the benefit cards to keep the code clean
@@ -25,7 +26,7 @@ const App = () => {
             <a href="#" className="text-[#292929] hover:text-[#0047AB] font-medium transition-colors">For Insurers</a>
             <a href="#" className="text-[#292929] hover:text-[#0047AB] font-medium transition-colors">For Users</a>
             <a href="#" className="text-[#292929] hover:text-[#0047AB] font-medium transition-colors">About Us</a>
-            <a href="/reg" className="bg-[#FF6600] text-white font-medium py-2 px-6 rounded-md shadow-lg hover:bg-[#E55B00] transition-colors">Get Started</a>
+            <Link  to="/reg" className="bg-[#FF6600] text-white font-medium py-2 px-6 rounded-md shadow-lg hover:bg-[#E55B00] transition-colors">Get Started</Link>
           </div>
         </nav>
       </header>

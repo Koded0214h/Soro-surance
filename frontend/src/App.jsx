@@ -116,9 +116,7 @@ function App() {
         <Route
           path="/reg"
           element={
-            <PrivateRoute>
-              <Registration />
-            </PrivateRoute>
+            <Registration />
           }
         />
         <Route

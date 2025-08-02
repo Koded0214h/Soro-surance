@@ -3,7 +3,6 @@
   "outputDirectory": "frontend/dist",
   "installCommand": "cd frontend && npm install",
   "framework": null,
-  "nodeVersion": "20.x",
   "routes": [
     {
       "src": "/assets/(.*)",

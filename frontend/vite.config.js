@@ -1,10 +1,11 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
+  base: '/', // This is important for routing
   build: {
-    outDir: 'dist'
-  },
-  base: './' // ensures proper path resolving in deployed static environment
-});
+    outDir: 'dist',
+    emptyOutDir: true
+  }
+})

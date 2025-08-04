@@ -7,6 +7,9 @@ const ClaimDashboard = () => {
   const [claims, setClaims] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [user, setUser] = useState(null);
+  const [errorUser, setErrorUser] = useState(null);
+  const [loadingUser, setLoadingUser] = useState(true);
 
   const getStatusIcon = (status) => {
     switch (status.toLowerCase()) {
@@ -24,6 +27,18 @@ const ClaimDashboard = () => {
   };
 
   useEffect(() => {
+
+    const fetchUser = async () => {
+      try {
+        const response = await api.get('/user/profile/');
+        setUser(response.data);
+      } catch (err) {
+        setErrorUser('Failed to load user info.');
+      } finally {
+        setLoadingUser(false);
+      }
+    };
+
     const fetchClaims = async () => {
       try {
         const response = await api.get('/user/claims/');
@@ -36,6 +51,7 @@ const ClaimDashboard = () => {
     };
 
     fetchClaims();
+    fetchUser();
   }, []);
 
   return (
@@ -43,8 +59,10 @@ const ClaimDashboard = () => {
       <Navbar />
       <div className="p-6 max-w-4xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900 mb-3 mt-16 text-center">Claim Whisper</h1>
-          <p className="text-gray-600 text-center">Welcome, Aisha!</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-3 mt-16 text-center">Soro surance</h1>
+          <p className="text-gray-600 text-center">
+            {loadingUser ? 'Loading...' : errorUser ? errorUser : `Welcome back, ${user?.full_name || user?.username || 'User'}!`}
+          </p>
         </div>
 
         <button

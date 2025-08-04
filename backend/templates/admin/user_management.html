@@ -1,0 +1,204 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block extrahead %}
+  {{ block.super }}
+  <link rel="stylesheet" type="text/css" href="{% static 'admin/css/custom.css' %}">
+  <style>
+    .user-management-container {
+      max-width: 1024px;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+    
+    .search-container {
+      display: flex;
+      align-items: center;
+      background-color: #fef7f2;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+      border: 1px solid #e5e7eb;
+      padding: 0.5rem;
+      max-width: 30rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .search-icon {
+      color: #9ca3af;
+      margin-right: 0.5rem;
+    }
+    
+    .search-input {
+      flex: 1;
+      outline: none;
+      font-size: 0.875rem;
+      background-color: #fef7f2;
+      color: #374151;
+    }
+    
+    .users-table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: #ffffff;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+      border: 1px solid #e5e7eb;
+    }
+    
+    .table-header {
+      background-color: #f9fafb;
+    }
+    
+    .table-header th {
+      padding: 0.75rem 1.5rem;
+      text-align: left;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .table-row {
+      border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .table-row:hover {
+      background-color: #f9fafb;
+    }
+    
+    .table-cell {
+      padding: 1rem 1.5rem;
+      font-size: 0.875rem;
+      color: #374151;
+    }
+    
+    .status-active {
+      padding: 0.125rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      background-color: #dcfce7;
+      color: #15803d;
+    }
+    
+    .ban-button {
+      display: flex;
+      align-items: center;
+      color: #ef4444;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 0.875rem;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+<div class="user-management-container">
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-gray-900 mb-1 mt-4">SoroSurance</h1>
+    <p class="text-gray-600">Manage all users and their activity</p>
+  </div>
+
+  <!-- Search Bar -->
+  <div class="search-container">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search search-icon" viewBox="0 0 16 16">
+      <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+    </svg>
+    <input
+      type="text"
+      placeholder="Search users"
+      class="search-input"
+      id="search-input"
+      onkeyup="filterUsers()"
+    />
+  </div>
+
+  <!-- Users Table -->
+  <div class="overflow-hidden">
+    <table class="users-table">
+      <thead class="table-header">
+        <tr>
+          <th>User</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="users-table-body">
+        {% for user in users %}
+        <tr class="table-row">
+          <td class="table-cell">{{ user.full_name }}</td>
+          <td class="table-cell">{{ user.email }}</td>
+          <td class="table-cell">{{ user.get_role_display }}</td>
+          <td class="table-cell">
+            {% if user.is_active %}
+              <span class="status-active">Active</span>
+            {% else %}
+              <span class="status-inactive">Inactive</span>
+            {% endif %}
+          </td>
+          <td class="table-cell">
+            {% if user.is_active %}
+              <button class="ban-button" onclick="banUser('{{ user.id }}', '{{ user.full_name }}')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-x" viewBox="0 0 16 16">
+                  <path d="M6 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H1s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.25.25-.5.5-.75.75l-.5.5-.5-.5-.75-.75.75-.75.5-.5.5.5.75.75z"/>
+                  <path d="M12.5 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zm-.5-5h1v1h-1v-1zm1-1h-1v-1h1v1z"/>
+                </svg>
+                <span class="ml-1">Ban</span>
+              </button>
+            {% else %}
+              <button class="activate-button" onclick="activateUser('{{ user.id }}', '{{ user.full_name }}')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-check" viewBox="0 0 16 16">
+                  <path d="M6 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H1s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.25.25-.5.5-.75.75l-.5.5-.5-.5-.75-.75.75-.75.5-.5.5.5.75.75z"/>
+                  <path d="M12.5 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zm1.679-4.493-1.335 2.226a.75.75 0 0 1-1.174.144l-.555-.555a.75.75 0 0 1 .041-1.089l1.193-1.193a.75.75 0 0 1 1.002 0l1.193 1.193a.75.75 0 0 1-.041 1.089z"/>
+                </svg>
+                <span class="ml-1">Activate</span>
+              </button>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  function filterUsers() {
+    const searchInput = document.getElementById('search-input');
+    const filter = searchInput.value.toLowerCase();
+    const tableRows = document.querySelectorAll('.table-row');
+    
+    tableRows.forEach(row => {
+      const userName = row.cells[0].textContent.toLowerCase();
+      if (userName.includes(filter)) {
+        row.style.display = '';
+      } else {
+        row.style.display = 'none';
+      }
+    });
+  }
+
+  function banUser(userId, userName) {
+    if (confirm(`Are you sure you want to ban ${userName}?`)) {
+      // In a real implementation, this would make an API call to ban the user
+      alert(`${userName} has been banned.`);
+      // Refresh the page to show updated status
+      location.reload();
+    }
+  }
+
+  function activateUser(userId, userName) {
+    if (confirm(`Are you sure you want to activate ${userName}?`)) {
+      // In a real implementation, this would make an API call to activate the user
+      alert(`${userName} has been activated.`);
+      // Refresh the page to show updated status
+      location.reload();
+    }
+  }
+</script>
+{% endblock %}

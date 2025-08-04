@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const Navbar2 = () => {
   return (
@@ -12,17 +13,17 @@ const Navbar2 = () => {
 
           {/* Right-aligned navigation links */}
           <div className="flex space-x-8">
-            <Link to="udash" className="text-orange-700 text-md font-medium hover:text-orange-600">
+            <Link to="/admin/dashboard" className="text-orange-700 text-md font-medium hover:text-orange-600">
               Dashboard
             </Link>
-            <Link to="/user" className="text-orange-700 text-md font-medium hover:text-orange-600">
+            <Link to="/admin/users" className="text-orange-700 text-md font-medium hover:text-orange-600">
               Users
             </Link>
-            <Link to="/claimp" className="text-orange-700 text-md font-medium hover:text-orange-600">
+            <Link to="/admin/claims" className="text-orange-700 text-md font-medium hover:text-orange-600">
               Claims
             </Link>
-            <Link to="/settings" className="text-orange-700 text-md font-medium hover:text-orange-600">
-            Settings
+            <Link to="/admin/settings" className="text-orange-700 text-md font-medium hover:text-orange-600">
+              Settings
             </Link>
           </div>
         </div>

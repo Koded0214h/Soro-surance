@@ -1,0 +1,172 @@
+/* Custom CSS for SoroSurance Admin Interface */
+
+/* Primary Colors */
+:root {
+  --primary-color: #e87d30;
+  --primary-dark: #d66a1f;
+  --primary-light: #f0a266;
+  --secondary-color: #2c3e50;
+  --accent-color: #3498db;
+  --success-color: #27ae60;
+  --warning-color: #f39c12;
+  --danger-color: #e74c3c;
+  --light-bg: #f8f9fa;
+  --dark-text: #333;
+  --light-text: #777;
+}
+
+/* Header/Branding */
+#header {
+  background-color: var(--secondary-color);
+  color: white;
+  border-bottom: 1px solid #ddd;
+}
+
+#branding h1, #branding h1 a:link, #branding h1 a:visited {
+  color: white;
+}
+
+/* Primary Navigation */
+#user-tools {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+#user-tools a:link, #user-tools a:visited {
+  color: white;
+}
+
+div.breadcrumbs {
+  background-color: var(--primary-color);
+  color: white;
+  border-bottom: 1px solid #ddd;
+}
+
+div.breadcrumbs a {
+  color: white;
+}
+
+/* Module Headers */
+.module h2, .module caption, .inline-group h2 {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+/* Buttons */
+.button, input[type=submit], input[type=button], .submit-row input, a.button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+}
+
+.button:hover, input[type=submit]:hover, input[type=button]:hover, .submit-row input:hover, a.button:hover {
+  background-color: var(--primary-dark);
+}
+
+.button.default, input[type=submit].default, .submit-row input.default {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+}
+
+.button.default:hover, input[type=submit].default:hover, .submit-row input.default:hover {
+  background-color: var(--primary-dark);
+}
+
+/* Links */
+a:link, a:visited {
+  color: var(--primary-color);
+}
+
+a:hover {
+  color: var(--primary-dark);
+}
+
+/* Tables */
+th {
+  background-color: var(--light-bg);
+  color: var(--dark-text);
+}
+
+tr.row1 {
+  background-color: #f9f9f9;
+}
+
+tr.row2 {
+  background-color: #ffffff;
+}
+
+/* Forms */
+.form-row {
+  border-bottom: 1px solid #eee;
+}
+
+/* Messages */
+.messages li.success {
+  background-color: var(--success-color);
+  color: white;
+}
+
+.messages li.warning {
+  background-color: var(--warning-color);
+  color: white;
+}
+
+.messages li.error {
+  background-color: var(--danger-color);
+  color: white;
+}
+
+/* Pagination */
+.paginator {
+  background-color: var(--light-bg);
+  border-top: 1px solid #ddd;
+}
+
+/* Object Tools */
+.object-tools a {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.object-tools a:hover {
+  background-color: var(--primary-dark);
+  color: white;
+}
+
+/* Calendar Widget */
+.calendar td.selected a {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.calendar td a:hover {
+  background-color: var(--primary-light);
+  color: white;
+}
+
+/* Filter */
+#changelist-filter h2 {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+#changelist-filter li.selected {
+  border-left: 5px solid var(--primary-color);
+}
+
+/* Action Checkbox */
+.action-checkbox-column {
+  background-color: var(--light-bg);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  #header {
+    padding: 10px;
+  }
+  
+  .module h2 {
+    padding: 10px;
+  }
+}

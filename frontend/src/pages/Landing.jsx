@@ -40,7 +40,7 @@ const App = () => {
           <div className="relative z-10 flex flex-col items-start space-y-6 p-4 md:p-8">
             <h1 className="text-4xl md:text-5xl font-bold leading-tight">Revolutionizing Insurance Claims with <span className="text-[#FFC420]">AI-Powered Voice</span></h1>
             <p className="text-lg md:text-xl">
-              Claim Whisper is an innovative platform that simplifies insurance claims for both companies and users. Submit claims using voice in local Nigerian languages, powered by advanced AI.
+              Soro surance is an innovative platform that simplifies insurance claims for both companies and users. Submit claims using voice in local Nigerian languages, powered by advanced AI.
             </p>
             <Link to="/reg" className="bg-[#FF6600] text-white font-medium py-3 px-8 rounded-lg shadow-lg hover:bg-[#E55B00] transition-colors">Get Started</Link>
           </div>
@@ -59,7 +59,7 @@ const App = () => {
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-[#292929] mb-4">Benefits for Insurance Companies</h2>
             <p className="text-lg text-[#555555] max-w-2xl mx-auto">
-              Streamline your claims process and enhance customer satisfaction with Claim Whisper.
+              Streamline your claims process and enhance customer satisfaction with Soro surance.
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -116,7 +116,7 @@ const App = () => {
         <div className="container mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Transform Your Insurance Claims Process?</h2>
           <p className="text-lg max-w-2xl mx-auto mb-8">
-            Join Claim Whisper today and experience the future of insurance claim management.
+            Join Soro surance today and experience the future of insurance claim management.
           </p>
           <Link to="/reg" className="bg-[#FF6600] text-white font-medium py-3 px-8 rounded-lg shadow-lg hover:bg-[#E55B00] transition-colors">
             Get Started
@@ -134,7 +134,7 @@ const App = () => {
               <Link to="#" className="hover:text-[#FF6600] transition-colors">Contact Us</Link>
             </div>
             <div>
-              &copy; 2024 Claim Whisper. All rights reserved.
+              &copy; 2024 Soro surance. All rights reserved.
             </div>
           </div>
         </div>

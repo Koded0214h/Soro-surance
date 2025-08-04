@@ -1,25 +1,25 @@
-import logging
-import time
-import requests
-import io
-import datetime
-import os # Import the os module for API keys
-import json # Import json to handle the LLM's response
+import logging, time, requests, datetime, random
+import io, os, json, uuid
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.conf import settings
 from django.core.files.uploadedfile import InMemoryUploadedFile
-import uuid
 from rest_framework import status, generics
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
+from rest_framework.decorators import api_view
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.contrib.auth import get_user_model
+from datetime import datetime, timedelta
+from django.contrib.auth import authenticate
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.utils import timezone
 
 from .serializers import (
     RegisterSerializer, ClaimSerializer,
-    AttachmentSerializer
+    AttachmentSerializer,
+    AdminMetricsSerializer, TrendsSerializer, FraudSerializer
 )
 from .models import (
     Claim, Attachment
@@ -163,7 +163,7 @@ class VoiceToTextView(APIView):
                         claim_type=extracted_claim_type, # Use the extracted claim type
                         location=extracted_location, # Use the extracted location
                         status="pending",
-                        incident_date=datetime.date.today() # Add the current date
+                        incident_date=datetime.now()
                     )
 
                     return Response({
@@ -323,7 +323,7 @@ class AttachmentUploadView(APIView):
     
 def send_claim_confirmation_email(claim, to_email, is_guest=False):
     subject = f"📝 Claim Submitted: {claim.claim_id}"
-    from_email = "Claim Whisperer <no-reply@yourdomain.com>"
+    from_email = "Soro surance <no-reply@yourdomain.com>"
     tracker_url = f"http://127.0.0.1:8000/track?claim_id={claim.claim_id}"  # change to your frontend tracker link
 
     html_content = render_to_string("email/claim_confirmation.html", {
@@ -337,3 +337,176 @@ def send_claim_confirmation_email(claim, to_email, is_guest=False):
     email = EmailMultiAlternatives(subject, "", from_email, [to_email])
     email.attach_alternative(html_content, "text/html")
     email.send()
+
+class AdminLoginView(APIView):
+    def post(self, request):
+        email = request.data.get('email')
+        password = request.data.get('password')
+        
+        user = authenticate(email=email, password=password)
+        
+        if user is None or not user.is_staff:
+            return Response(
+                {'detail': 'Invalid credentials or not an admin'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+            
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
+            'user': {
+                'id': user.id,
+                'email': user.email,
+                'name': user.get_full_name()
+            }
+        })   
+        
+@api_view(['POST'])
+def admin_password_reset(request):
+    email = request.data.get('email')
+    
+    try:
+        user = User.objects.get(email=email, is_staff=True)
+    except User.DoesNotExist:
+        return Response(
+            {'detail': 'No admin account with this email exists'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    # Generate reset token (you might want to use django-rest-passwordreset)
+    token = "generated-reset-token"  # Implement proper token generation
+    
+    reset_link = f"{settings.FRONTEND_URL}/admin/password-reset/confirm/?token={token}"
+    
+    return Response({'detail': 'Password reset link sent'}) 
+    
+class AdminMetricsView(APIView):
+    permission_classes = [IsAdminUser]
+    
+    def get(self, request):
+        # Calculate metrics
+        total_claims = Claim.objects.count()
+        approved_claims = Claim.objects.filter(status='approved').count()
+        flagged_claims = Claim.objects.filter(status='flagged').count()
+        rejected_claims = Claim.objects.filter(status='rejected').count()
+        
+        # Calculate changes from last month
+        now = timezone.now()
+        last_month = now - timedelta(days=30)
+        
+        # Previous period counts
+        prev_total = Claim.objects.filter(created_at__lt=last_month).count()
+        prev_approved = Claim.objects.filter(status='approved', created_at__lt=last_month).count()
+        prev_flagged = Claim.objects.filter(status='flagged', created_at__lt=last_month).count()
+        prev_rejected = Claim.objects.filter(status='rejected', created_at__lt=last_month).count()
+        
+        # Calculate percentage changes
+        def calc_change(current, previous):
+            if previous == 0:
+                return 0.0
+            return round(((current - previous) / previous) * 100, 1)
+        
+        data = {
+            'total_claims': total_claims,
+            'approved_claims': approved_claims,
+            'flagged_claims': flagged_claims,
+            'rejected_claims': rejected_claims,
+            'received_change': calc_change(total_claims, prev_total),
+            'approved_change': calc_change(approved_claims, prev_approved),
+            'flagged_change': calc_change(flagged_claims, prev_flagged),
+            'rejected_change': calc_change(rejected_claims, prev_rejected),
+        }
+        
+        serializer = AdminMetricsSerializer(data)
+        return Response(serializer.data)
+
+class ClaimsTrendsView(APIView):
+    permission_classes = [IsAdminUser]
+    
+    def get(self, request):
+        # Get claims for last 6 months
+        end_date = timezone.now()
+        start_date = end_date - timedelta(days=180)  # 6 months
+        
+        # Initialize data structures
+        months = []
+        claim_counts = []
+        
+        # Generate month labels and counts
+        current = start_date
+        while current <= end_date:
+            month_name = current.strftime('%b')
+            months.append(month_name)
+            
+            # Count claims for this month
+            next_month = current + timedelta(days=30)
+            count = Claim.objects.filter(
+                created_at__gte=current,
+                created_at__lt=next_month
+            ).count()
+            claim_counts.append(count)
+            
+            current = next_month
+        
+        # Calculate trend change (last month vs previous month)
+        if len(claim_counts) >= 2:
+            last_month = claim_counts[-1]
+            prev_month = claim_counts[-2]
+            trend_change = round(((last_month - prev_month) / prev_month) * 100, 1) if prev_month != 0 else 0.0
+        else:
+            trend_change = 0.0
+        
+        data = {
+            'months': months[-7:],  # Last 7 months (including current)
+            'claim_counts': claim_counts[-7:],
+            'trend_change': trend_change
+        }
+        
+        serializer = TrendsSerializer(data)
+        return Response(serializer.data)
+
+class FraudTrendsView(APIView):
+    permission_classes = [IsAdminUser]
+    
+    def get(self, request):
+        # In a real implementation, you would calculate actual fraud scores
+        # For this example, we'll simulate data
+        
+        # Get last 6 months
+        end_date = timezone.now()
+        start_date = end_date - timedelta(days=180)  # 6 months
+        
+        # Initialize data structures
+        months = []
+        fraud_scores = []
+        
+        # Generate simulated fraud scores (decreasing trend)
+        current = start_date
+        base_score = 120
+        while current <= end_date:
+            month_name = current.strftime('%b')
+            months.append(month_name)
+            
+            # Simulate decreasing fraud score with some randomness
+            score = max(50, base_score - len(fraud_scores) * 5 + (5 - random.randint(0, 10)))
+            fraud_scores.append(score)
+            
+            current += timedelta(days=30)
+        
+        # Calculate fraud change (last month vs previous month)
+        if len(fraud_scores) >= 2:
+            last_month = fraud_scores[-1]
+            prev_month = fraud_scores[-2]
+            fraud_change = round(((last_month - prev_month) / prev_month) * 100, 1) if prev_month != 0 else 0.0
+        else:
+            fraud_change = 0.0
+        
+        data = {
+            'months': months[-7:],  # Last 7 months (including current)
+            'fraud_scores': fraud_scores[-7:],
+            'fraud_change': fraud_change
+        }
+        
+        serializer = FraudSerializer(data)
+        return Response(serializer.data)

@@ -1,6 +1,6 @@
-# Claim Whisperer
+# Soro surance
 
-**Claim Whisperer** is an inclusive, AI-powered insurance claims platform tailored for the elderly, visually impaired, low-literate, or tech-inexperienced individuals who are often left behind in traditional insurance systems due to complex forms, poor accessibility, or language barriers.
+**Soro surance** is an inclusive, AI-powered insurance claims platform tailored for the elderly, visually impaired, low-literate, or tech-inexperienced individuals who are often left behind in traditional insurance systems due to complex forms, poor accessibility, or language barriers.
 
 Instead of filling forms, users simply talk to an AI assistant — the system transcribes, understands, and files the insurance claim on their behalf. The platform supports **local Nigerian languages**, enables **guest submissions**, and offers features like **document upload**, **voice quality feedback**, and a mini **claim assistant chatbot**.
 
@@ -163,7 +163,7 @@ Upload Evidence: Add media (images, docs, videos)
 For questions or contributions, open an issue or contact the team at claimwhisperer@yourdomain.com.
 
 # 🧠 Credits
-Built with ❤️ by the Claim Whisperer team — committed to inclusive innovation.
+Built with ❤️ by the Soro surance team — committed to inclusive innovation.
 
 # 🏁 License
 MIT License. See LICENSE.md for details.

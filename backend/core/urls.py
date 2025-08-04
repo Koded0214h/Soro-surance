@@ -18,4 +18,11 @@ urlpatterns = [
     path('auth/register/', views.RegisterView.as_view(), name='register'),
     path('auth/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    
+    path('admin/auth/login/', views.AdminLoginView.as_view(), name='admin-login'),
+    path('admin/auth/refresh/', TokenRefreshView.as_view(), name='admin-token-refresh'),
+    path('admin/auth/password/reset/', views.admin_password_reset, name='admin-password-reset'),
+    path('admin/metrics/', views.AdminMetricsView.as_view(), name='admin-metrics'),
+    path('admin/claims/trends/', views.ClaimsTrendsView.as_view(), name='claims-trends'),
+    path('admin/fraud/', views.FraudTrendsView.as_view(), name='fraud-trends'),
 ]

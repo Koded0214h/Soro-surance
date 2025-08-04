@@ -1,0 +1,257 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block extrahead %}
+  {{ block.super }}
+  <link rel="stylesheet" type="text/css" href="{% static 'admin/css/custom.css' %}">
+  <style>
+    .settings-container {
+      max-width: 1024px;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+    
+    .settings-card {
+      background-color: #ffffff;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      border: 1px solid #e5e7eb;
+    }
+    
+    .api-key-input {
+      flex: 1;
+      background-color: #f3f4f6;
+      border: 1px solid #d1d5db;
+      border-top-left-radius: 0.375rem;
+      border-bottom-left-radius: 0.375rem;
+      padding: 0.5rem;
+      font-size: 0.875rem;
+    }
+    
+    .copy-button {
+      background-color: #e5e7eb;
+      border: 1px solid #d1d5db;
+      border-left: 0;
+      border-top-right-radius: 0.375rem;
+      border-bottom-right-radius: 0.375rem;
+      padding: 0.5rem;
+      cursor: pointer;
+    }
+    
+    .regenerate-button {
+      display: flex;
+      align-items: center;
+      color: #e87d30;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 0.875rem;
+    }
+    
+    .radio-option {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .radio-option input {
+      height: 1rem;
+      width: 1rem;
+      color: #e87d30;
+      border-color: #e87d30;
+    }
+    
+    .radio-label {
+      margin-left: 0.75rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #374151;
+    }
+    
+    .radio-description {
+      margin-left: 1.75rem;
+      font-size: 0.75rem;
+      color: #6b7280;
+    }
+    
+    .save-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 0.5rem 1rem;
+      border: 1px solid transparent;
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #ffffff;
+      background-color: #e87d30;
+      cursor: pointer;
+    }
+    
+    .save-button:hover {
+      background-color: #d66a1f;
+    }
+    
+    .save-button.saved {
+      background-color: #27ae60;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+<div class="settings-container">
+  <h1 class="text-2xl font-bold text-gray-900 mb-8 mt-4">Settings</h1>
+  
+  <!-- API Keys Section -->
+  <div class="settings-card">
+    <h2 class="text-xl font-semibold text-gray-800 mb-4">API Keys</h2>
+    
+    <div class="mb-4">
+      <label class="block text-sm font-medium text-gray-700 mb-2">API Key</label>
+      <div class="flex">
+        <input
+          type="text"
+          value="{{ api_key|default:'sk_live_1234567890abcdef1234567890abcdef' }}"
+          readonly
+          class="api-key-input"
+        />
+        <button
+          onclick="copyApiKey()"
+          class="copy-button"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16">
+            <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
+            <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <button
+      onclick="regenerateApiKey()"
+      class="regenerate-button"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-repeat" viewBox="0 0 16 16">
+        <path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.378 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.378 0L.346 8.59A.25.25 0 0 0 .538 9z"/>
+        <path fill-rule="evenodd" d="M8 3c-4.418 0-8 3.582-8 8s3.582 8 8 8 8-3.582 8-8-3.582-8-8-8zm0 1c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.14-7-7 3.14-7 7-7z"/>
+      </svg>
+      <span class="ml-2">Regenerate API Key</span>
+    </button>
+  </div>
+
+  <!-- STT Model Section -->
+  <div class="settings-card">
+    <h2 class="text-xl font-semibold text-gray-800 mb-4">Speech-to-Text (STT) Model</h2>
+    
+    <div class="space-y-4">
+      <div class="radio-option">
+        <input
+          type="radio"
+          id="google-stt"
+          name="stt-model"
+          {% if selected_stt == 'google' %}checked{% endif %}
+          onchange="updateSttModel('google')"
+        />
+        <label for="google-stt" class="radio-label">
+          <span class="font-bold">Google STT</span>
+        </label>
+        <p class="radio-description">Use Google's speech-to-text model for transcription.</p>
+      </div>
+
+      <div class="radio-option">
+        <input
+          type="radio"
+          id="whisper-stt"
+          name="stt-model"
+          {% if selected_stt == 'whisper' %}checked{% endif %}
+          onchange="updateSttModel('whisper')"
+        />
+        <label for="whisper-stt" class="radio-label">
+          <span class="font-bold">Whisper STT</span>
+        </label>
+        <p class="radio-description">Use Whisper's speech-to-text model for transcription.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Language Model Section -->
+  <div class="settings-card">
+    <h2 class="text-xl font-semibold text-gray-800 mb-4">Voice Language Model</h2>
+    
+    <div class="mb-4">
+      <label class="block text-sm font-medium text-gray-700 mb-2">Select Language</label>
+      <select
+        id="language-select"
+        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm rounded-md"
+        onchange="updateLanguage()"
+      >
+        <option value="english" {% if selected_language == 'english' %}selected{% endif %}>English</option>
+        <option value="yoruba" {% if selected_language == 'yoruba' %}selected{% endif %}>Yoruba</option>
+        <option value="hausa" {% if selected_language == 'hausa' %}selected{% endif %}>Hausa</option>
+        <option value="igbo" {% if selected_language == 'igbo' %}selected{% endif %}>Igbo</option>
+        <option value="pidgin" {% if selected_language == 'pidgin' %}selected{% endif %}>Pidgin</option>
+      </select>
+    </div>
+
+    <button
+      id="save-button"
+      onclick="saveSettings()"
+      class="save-button"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-save" viewBox="0 0 16 16">
+        <path d="M2 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H9.5L8 2.5 6.5 1H2zm3.5 5a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5H4.5a.5.5 0 0 1 0-1h1V6.5a.5.5 0 0 1 .5-.5zm0 3a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5H4.5a.5.5 0 0 1 0-1h1V9.5a.5.5 0 0 1 .5-.5zm3 0a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5H7.5a.5.5 0 0 1 0-1h1V9.5a.5.5 0 0 1 .5-.5z"/>
+      </svg>
+      <span class="ml-2" id="save-text">Save Changes</span>
+    </button>
+  </div>
+</div>
+
+<script>
+  function copyApiKey() {
+    const apiKeyInput = document.querySelector('.api-key-input');
+    apiKeyInput.select();
+    document.execCommand('copy');
+    alert('API key copied to clipboard!');
+  }
+
+  function regenerateApiKey() {
+    const apiKeyInput = document.querySelector('.api-key-input');
+    const newKey = `sk_live_${Math.random().toString(36).substring(2, 18)}${Math.random().toString(36).substring(2, 18)}`;
+    apiKeyInput.value = newKey;
+    alert('New API key generated!');
+  }
+
+  function updateSttModel(model) {
+    // In a real implementation, this would make an API call to update the setting
+    console.log('STT model updated to:', model);
+  }
+
+  function updateLanguage() {
+    const languageSelect = document.getElementById('language-select');
+    const selectedLanguage = languageSelect.value;
+    // In a real implementation, this would make an API call to update the setting
+    console.log('Language updated to:', selectedLanguage);
+  }
+
+  function saveSettings() {
+    const saveButton = document.getElementById('save-button');
+    const saveText = document.getElementById('save-text');
+    
+    // Change button to saved state
+    saveButton.classList.add('saved');
+    saveText.textContent = 'Changes Saved!';
+    
+    // Reset button after 3 seconds
+    setTimeout(() => {
+      saveButton.classList.remove('saved');
+      saveText.textContent = 'Save Changes';
+    }, 3000);
+    
+    // In a real implementation, this would make an API call to save the settings
+    console.log('Settings saved!');
+  }
+</script>
+{% endblock %}

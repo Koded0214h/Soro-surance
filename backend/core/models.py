@@ -43,6 +43,14 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return f"{self.email or 'Guest'} ({self.role})"
 
+class Attachment(models.Model):
+    file = models.FileField(upload_to='attachments/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Attachment for {self.claim.claim_id}"
+
+
 class Claim(models.Model):
     CLAIM_TYPES = (
         ('auto', 'Auto Accident'),
@@ -67,6 +75,7 @@ class Claim(models.Model):
     incident_date = models.DateField()
     voice_transcript = models.TextField(blank=True, null=True)  # Stores the speech-to-text output
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='submitted')
+    attachment = models.ForeignKey(Attachment, on_delete=models.CASCADE, null=True, blank=True)
     submitted_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -85,10 +94,3 @@ class Claim(models.Model):
         return f"{self.claim_type} @ {self.location} (ID: {self.claim_id})"
     
     
-class Attachment(models.Model):
-    claim = models.ForeignKey("Claim", on_delete=models.CASCADE, related_name="attachments")
-    file = models.FileField(upload_to='attachments/')
-    uploaded_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"Attachment for {self.claim.claim_id}"

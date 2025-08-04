@@ -3,7 +3,7 @@ from django.template.loader import render_to_string
 
 def send_claim_confirmation_email(claim, to_email, is_guest=False):
     subject = f"📝 Claim Submitted: {claim.claim_id}"
-    from_email = "Claim Whisperer <no-reply@yourdomain.com>"
+    from_email = "Soro surance <no-reply@yourdomain.com>"
     tracker_url = f"http://127.0.0.1:8000/track?claim_id={claim.claim_id}"
 
     user_name = claim.user.first_name if claim.user and claim.user.first_name else "there"
@@ -19,7 +19,7 @@ def send_claim_confirmation_email(claim, to_email, is_guest=False):
     text_content = f"""
     Hello {user_name},
 
-    Thank you for submitting your claim to Claim Whisperer.
+    Thank you for submitting your claim to Soro surance.
 
     Claim ID: {claim.claim_id}
     Status: {claim.status.title()}
@@ -28,7 +28,7 @@ def send_claim_confirmation_email(claim, to_email, is_guest=False):
 
     { "You submitted as a guest. Login to manage your claims." if is_guest else "" }
 
-    -- Claim Whisperer Team
+    -- Soro surance Team
     """
 
     email = EmailMultiAlternatives(subject, text_content, from_email, [to_email])

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { FiSearch, FiUserX, FiMoreVertical } from 'react-icons/fi';
 import Navbar2 from '../component/Navbar2';
 
-const UserManagement = () => {
+const AdminUserManagement = () => {
   const [searchQuery, setSearchQuery] = useState('');
   
   // Sample user data
@@ -82,4 +82,4 @@ const UserManagement = () => {
   );
 };
 
-export default UserManagement;
+export default AdminUserManagement;

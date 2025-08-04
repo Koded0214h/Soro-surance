@@ -1,22 +1,52 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FiLock, FiMail, FiEye, FiEyeOff, FiArrowRight } from "react-icons/fi";
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { useAdminAuth } from '../context/AdminAuthContext';
 
 const AdminAuth = () => {
+  const { admin, login, requestPasswordReset, error, loading } = useAdminAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoginView, setIsLoginView] = useState(true);
+  const [successMessage, setSuccessMessage] = useState("");
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  // Redirect if already logged in
+  useEffect(() => {
+    if (admin) {
+      navigate('/admin/dashboard');
+    }
+  }, [admin, navigate]);
+
+  const handleLogin = async (e) => {
     e.preventDefault();
-    // Add your authentication logic here
-    console.log("Admin login attempt:", { email, password });
+    try {
+      await login(email, password);
+    } catch (error) {
+      // Error is handled by the context
+    }
   };
 
+  const handlePasswordReset = async (e) => {
+    e.preventDefault();
+    try {
+      const result = await requestPasswordReset(email);
+      if (result) {
+        setSuccessMessage(result.detail || "Password reset link sent to your email");
+        setTimeout(() => {
+          setSuccessMessage("");
+          setIsLoginView(true);
+        }, 5000);
+      }
+    } catch (error) {
+      // Error is handled by the context
+    }
+  };
+
+
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      {/* Admin Branding Header */}
+    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
         <div className="w-16 h-16 bg-orange-600 rounded-lg mx-auto flex items-center justify-center mb-4">
           <FiLock className="text-white text-2xl" />
@@ -27,16 +57,14 @@ const AdminAuth = () => {
         <p className="mt-2 text-sm text-gray-600">
           {isLoginView 
             ? "Enter your credentials to access the dashboard" 
-            : "Reset your admin password"}
+            : "Enter your email to receive a password reset link"}
         </p>
       </div>
 
-      {/* Auth Card */}
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           {isLoginView ? (
-            // Login Form
-            <form className="space-y-6" onSubmit={handleSubmit}>
+            <form className="space-y-6" onSubmit={handleLogin}>
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                   Admin Email
@@ -55,6 +83,7 @@ const AdminAuth = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     className="py-2 pl-10 block w-full border border-gray-300 rounded-md focus:ring-orange-500 focus:border-orange-500"
                     placeholder="admin@example.com"
+                    disabled={loading}
                   />
                 </div>
               </div>
@@ -76,6 +105,7 @@ const AdminAuth = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="py-2 pl-10 pr-10 block w-full border border-gray-300 rounded-md focus:ring-orange-500 focus:border-orange-500"
+                    disabled={loading}
                   />
                   <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
                     <button
@@ -88,6 +118,12 @@ const AdminAuth = () => {
                   </div>
                 </div>
               </div>
+
+              {error && (
+                <div className="text-red-600 text-sm text-center py-2">
+                  {error}
+                </div>
+              )}
 
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
@@ -114,18 +150,18 @@ const AdminAuth = () => {
               </div>
 
               <div>
-                <Link to="/dashboard">
                 <button
                   type="submit"
-                  className="w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  disabled={loading}
+                  className="w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Sign in <FiArrowRight className="ml-2" />
-                </button></Link>
+                  {loading ? 'Signing in...' : 'Sign in'} 
+                  {!loading && <FiArrowRight className="ml-2" />}
+                </button>
               </div>
             </form>
           ) : (
-            // Password Recovery Form
-            <form className="space-y-6" onSubmit={handleSubmit}>
+            <form className="space-y-6" onSubmit={handlePasswordReset}>
               <div>
                 <label htmlFor="recovery-email" className="block text-sm font-medium text-gray-700">
                   Admin Email
@@ -144,14 +180,30 @@ const AdminAuth = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     className="py-2 pl-10 block w-full border border-gray-300 rounded-md focus:ring-orange-500 focus:border-orange-500"
                     placeholder="admin@example.com"
+                    disabled={loading}
                   />
                 </div>
               </div>
 
+              {error && (
+                <div className="text-red-600 text-sm text-center py-2">
+                  {error}
+                </div>
+              )}
+
+              {successMessage && (
+                <div className="text-green-600 text-sm text-center py-2">
+                  {successMessage}
+                </div>
+              )}
+
               <div className="flex items-center justify-between">
                 <button
                   type="button"
-                  onClick={() => setIsLoginView(true)}
+                  onClick={() => {
+                    setIsLoginView(true);
+                    setError(null);
+                  }}
                   className="text-sm font-medium text-gray-600 hover:text-gray-500"
                 >
                   Back to login
@@ -161,15 +213,16 @@ const AdminAuth = () => {
               <div>
                 <button
                   type="submit"
-                  className="w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+                  disabled={loading}
+                  className="w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Send Reset Link <FiArrowRight className="ml-2" />
+                  {loading ? 'Sending...' : 'Send Reset Link'}
+                  {!loading && <FiArrowRight className="ml-2" />}
                 </button>
               </div>
             </form>
           )}
 
-          {/* Security Note */}
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">

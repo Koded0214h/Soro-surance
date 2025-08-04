@@ -1,0 +1,266 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block extrahead %}
+  {{ block.super }}
+  <link rel="stylesheet" type="text/css" href="{% static 'admin/css/custom.css' %}">
+  <script>
+    function approveClaim(claimId) {
+      if (confirm('Are you sure you want to approve this claim?')) {
+        fetch(`/admin/claims/${claimId}/approve/`, {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json'
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            window.location.reload();
+          } else {
+            alert('Error: ' + data.error);
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Error processing request');
+        });
+      }
+    }
+
+    function rejectClaim(claimId) {
+      if (confirm('Are you sure you want to reject this claim?')) {
+        fetch(`/admin/claims/${claimId}/reject/`, {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json'
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            window.location.reload();
+          } else {
+            alert('Error: ' + data.error);
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Error processing request');
+        });
+      }
+    }
+
+    function flagFraud(claimId) {
+      if (confirm('Are you sure you want to flag this claim as fraud?')) {
+        fetch(`/admin/claims/${claimId}/flag-fraud/`, {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json'
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            window.location.reload();
+          } else {
+            alert('Error: ' + data.error);
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Error processing request');
+        });
+      }
+    }
+  </script>
+  <style>
+    .claim-detail-container {
+      max-width: 1024px;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+    
+    .back-button {
+      display: flex;
+      align-items: center;
+      color: #e87d30;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 0.875rem;
+      margin-bottom: 1rem;
+    }
+    
+    .status-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+    
+    .status-pending {
+      background-color: #fef3c7;
+      color: #92400e;
+    }
+    
+    .status-approved {
+      background-color: #dcfce7;
+      color: #15803d;
+    }
+    
+    .status-rejected {
+      background-color: #fee2e2;
+      color: #b91c1c;
+    }
+    
+    .detail-card {
+      background-color: #ffffff;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid #e5e7eb;
+    }
+    
+    .detail-label {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #6b7280;
+      margin-bottom: 0.25rem;
+    }
+    
+    .detail-value {
+      font-size: 1rem;
+      color: #374151;
+      margin-bottom: 1rem;
+    }
+    
+    .action-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem 1rem;
+      border: 1px solid transparent;
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      margin-right: 0.5rem;
+    }
+    
+    .approve-button {
+      color: #ffffff;
+      background-color: #27ae60;
+    }
+    
+    .approve-button:hover {
+      background-color: #219653;
+    }
+    
+    .reject-button {
+      color: #ffffff;
+      background-color: #e74c3c;
+    }
+    
+    .reject-button:hover {
+      background-color: #c0392b;
+    }
+    
+    .fraud-button {
+      color: #ffffff;
+      background-color: #f39c12;
+    }
+    
+    .fraud-button:hover {
+      background-color: #d35400;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+<div class="claim-detail-container">
+  <!-- Back Button -->
+  <button class="back-button" onclick="window.location.href='{% url 'admin:claims' %}'">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
+      <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+    </svg>
+    <span class="ml-1">Back to Claims</span>
+  </button>
+
+  <!-- Claim Header -->
+  <div class="detail-card">
+    <div class="flex justify-between items-start">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900 mb-2">Claim #{{ claim.claim_id }}</h1>
+        <p class="text-gray-600">Submitted on {{ claim.created_at|date:"F d, Y" }}</p>
+      </div>
+      <span class="status-badge {% if claim.status == 'pending' %}status-pending{% elif claim.status == 'approved' %}status-approved{% else %}status-rejected{% endif %}">
+        {% if claim.status == 'pending' %}Pending{% elif claim.status == 'approved' %}Approved{% else %}Rejected{% endif %}
+      </span>
+    </div>
+  </div>
+
+  <!-- Claim Details -->
+  <div class="detail-card">
+    <h2 class="text-xl font-bold text-gray-900 mb-4">Claim Details</h2>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <div class="detail-label">Claim Type</div>
+        <div class="detail-value">{{ claim.get_claim_type_display }}</div>
+      </div>
+      
+      <div>
+        <div class="detail-label">Location</div>
+        <div class="detail-value">{{ claim.location }}</div>
+      </div>
+      
+      <div>
+        <div class="detail-label">Incident Date</div>
+        <div class="detail-value">{{ claim.incident_date }}</div>
+      </div>
+      
+      <div>
+        <div class="detail-label">User</div>
+        <div class="detail-value">{{ claim.user.full_name }}</div>
+      </div>
+    </div>
+    
+    <div>
+      <div class="detail-label">Description</div>
+      <div class="detail-value">{{ claim.description }}</div>
+    </div>
+    
+    {% if claim.voice_transcript %}
+    <div>
+      <div class="detail-label">Voice Transcript</div>
+      <div class="detail-value">{{ claim.voice_transcript }}</div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Actions -->
+  <div class="detail-card">
+    <h2 class="text-xl font-bold text-gray-900 mb-4">Actions</h2>
+    
+    <div class="flex flex-wrap gap-2">
+      <button class="action-button approve-button" onclick="approveClaim('{{ claim.id }}')">
+        Approve
+      </button>
+      
+      <button class="action-button reject-button" onclick="rejectClaim('{{ claim.id }}')">
+        Reject
+      </button>
+      
+      <button class="action-button fraud-button" onclick="flagFraud('{{ claim.id }}')">
+        flag
+      </button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

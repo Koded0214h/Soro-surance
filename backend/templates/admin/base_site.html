@@ -1,0 +1,20 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | SoroSurance Admin{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+  <a href="{% url 'admin:index' %}">
+    <span style="color: #e87d30;">SoroSurance</span> Admin
+  </a>
+</h1>
+{% endblock %}
+
+{% block nav-global %}
+  <div style="margin-top: 1rem;">
+    <a href="{% url 'admin:dashboard' %}" style="color: #e87d30; margin-right: 1rem;">Dashboard</a>
+    <a href="{% url 'admin:claims' %}" style="color: #e87d30; margin-right: 1rem;">Claims</a>
+    <a href="{% url 'admin:settings' %}" style="color: #e87d30; margin-right: 1rem;">Settings</a>
+    <a href="{% url 'admin:user_management' %}" style="color: #e87d30; margin-right: 1rem;">User Management</a>
+  </div>
+{% endblock %}

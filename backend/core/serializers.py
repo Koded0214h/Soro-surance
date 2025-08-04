@@ -1,5 +1,6 @@
 from rest_framework import serializers
-
+from rest_framework import serializers
+from datetime import datetime, timedelta
 from django.contrib.auth import get_user_model
 
 from .models import Claim, Attachment
@@ -46,3 +47,23 @@ class AttachmentSerializer(serializers.ModelSerializer):
         model = Attachment
         fields = ['id', 'claim', 'file', 'uploaded_at']
         read_only_fields = ['id', 'uploaded_at']
+
+class AdminMetricsSerializer(serializers.Serializer):
+    total_claims = serializers.IntegerField()
+    approved_claims = serializers.IntegerField()
+    flagged_claims = serializers.IntegerField()
+    rejected_claims = serializers.IntegerField()
+    received_change = serializers.FloatField()
+    approved_change = serializers.FloatField()
+    flagged_change = serializers.FloatField()
+    rejected_change = serializers.FloatField()
+
+class TrendsSerializer(serializers.Serializer):
+    months = serializers.ListField(child=serializers.CharField())
+    claim_counts = serializers.ListField(child=serializers.IntegerField())
+    trend_change = serializers.FloatField()
+
+class FraudSerializer(serializers.Serializer):
+    months = serializers.ListField(child=serializers.CharField())
+    fraud_scores = serializers.ListField(child=serializers.IntegerField())
+    fraud_change = serializers.FloatField()

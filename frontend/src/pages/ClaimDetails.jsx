@@ -1,8 +1,8 @@
-// ClaimDetails.js
 import React, { useState, useRef, useEffect } from 'react';
-import { FiPlay, FiPause, FiRefreshCw } from 'react-icons/fi';
-import { useLocation } from 'react-router-dom';
+import { FiPlay, FiPause } from 'react-icons/fi';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Navbar from '../component/Navbar';
+
 const ClaimDetails = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -10,12 +10,16 @@ const ClaimDetails = () => {
   const audioRef = useRef(null);
   const progressInterval = useRef(null);
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (location.state) {
       setClaim(location.state);
+    } else {
+      // Redirect back if no claim data
+      navigate('/claimd');
     }
-  }, [location]);
+  }, [location, navigate]);
 
   const togglePlayback = () => {
     if (isPlaying) {
@@ -41,33 +45,61 @@ const ClaimDetails = () => {
   if (!claim) {
     return (
       <>
-      <Navbar />
-      <div className="dark:bg-gray-900 min-h-screen flex items-center justify-center text-2xl">
-        <p>No claim data found. Please submit a claim first.</p>
-      </div>
+        <Navbar />
+        <div className="min-h-screen flex items-center justify-center text-2xl">
+          <p>Loading claim details...</p>
+        </div>
       </>
     );
   }
 
   return (
     <>
-    <Navbar />
-      <div className="dark:bg-gray-900 min-h-screen">
-        <div className="pt-20 px-8 flex flex-col lg:flex-row gap-8">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md flex-1">
-            <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-6">
-              {claim.claimData.id}
+      <Navbar />
+      <div className="min-h-screen bg-gray-50">
+        <div className="pt-20 px-8 max-w-4xl mx-auto">
+          <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h1 className="text-3xl font-bold text-gray-800 mb-6">
+              Claim #{claim.claim_id}
             </h1>
             
             <div className="space-y-6">
-              <div>
-                <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
-                  Voice Data
+              <div className="bg-orange-50 rounded-lg p-4 border border-orange-100">
+                <h2 className="text-xl font-semibold text-gray-800 mb-4">
+                  Claim Information
                 </h2>
-                
-                <div className="bg-orange-50 dark:bg-gray-700 rounded-lg p-4">
-                  <h3 className="text-lg font-medium text-gray-800 dark:text-gray-300 mb-3">
-                    Claim Recording
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">Description:</p>
+                    <p className="text-gray-900">{claim.description || 'Not provided'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">Location:</p>
+                    <p className="text-gray-900">{claim.location || 'Not provided'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">Incident Date:</p>
+                    <p className="text-gray-900">
+                      {claim.incident_date ? new Date(claim.incident_date).toLocaleDateString() : 'Not provided'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">Status:</p>
+                    <p className={`font-medium ${
+                      claim.status === 'approved' ? 'text-green-600' :
+                      claim.status === 'rejected' ? 'text-red-600' :
+                      'text-orange-600'
+                    }`}>
+                      {claim.status || 'Unknown'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {claim.audio_url && (
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <h3 className="text-lg font-medium text-gray-800 mb-3">
+                    Voice Recording
                   </h3>
                   <div className="flex items-center gap-4">
                     <button
@@ -77,10 +109,8 @@ const ClaimDetails = () => {
                       {isPlaying ? <FiPause size={20} /> : <FiPlay size={20} />}
                     </button>
                     <div className="flex-1">
-                      <p className="text-gray-900 dark:text-gray-300">
-                        {claim.claimData.id}.wav
-                      </p>
-                      <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2 mt-2">
+                      <p className="text-gray-900">Claim Recording</p>
+                      <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
                         <div 
                           className="bg-orange-500 h-2 rounded-full" 
                           style={{ width: `${progress}%` }}
@@ -89,66 +119,35 @@ const ClaimDetails = () => {
                     </div>
                   </div>
                 </div>
-              </div>
+              )}
 
-              <div>
-                <h3 className="text-lg font-medium text-gray-800 dark:text-gray-300 mb-2">
-                  Transcribed Text
-                </h3>
-                <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600 h-48 overflow-y-auto">
-                  <p className="text-gray-700 dark:text-gray-300">
-                    {claim.transcription || 'No transcription available'}
-                  </p>
+              {claim.transcription && (
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <h3 className="text-lg font-medium text-gray-800 mb-3">
+                    Transcribed Text
+                  </h3>
+                  <div className="p-3 bg-white rounded border border-gray-200 h-48 overflow-y-auto">
+                    <p className="text-gray-700">
+                      {claim.transcription}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md lg:w-96">
-            <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6">
-              Claim Details
-            </h2>
-            
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">
-                  Claim ID
-                </h3>
-                <p className="text-gray-900 dark:text-gray-300">
-                  {claim.claimData.id}
-                </p>
-              </div>
-
-              <div>
-                <h3 className="text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">
-                  Submission Date
-                </h3>
-                <p className="text-gray-900 dark:text-gray-300">
-                  {claim.claimData.date}
-                </p>
-              </div>
-
-              <div>
-                <h3 className="text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">
-                  Status
-                </h3>
-                <p className="text-gray-900 dark:text-gray-300">
-                  {claim.claimData.status}
-                </p>
-              </div>
+              )}
             </div>
           </div>
         </div>
 
-        <audio
-          ref={audioRef}
-          src={claim.audioUrl}
-          onEnded={() => {
-            setIsPlaying(false);
-            clearInterval(progressInterval.current);
-            setProgress(0);
-          }}
-        />
+        {claim.audio_url && (
+          <audio
+            ref={audioRef}
+            src={claim.audio_url}
+            onEnded={() => {
+              setIsPlaying(false);
+              clearInterval(progressInterval.current);
+              setProgress(0);
+            }}
+          />
+        )}
       </div>
     </>
   );

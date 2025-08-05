@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FiMic, FiClock, FiCheckCircle, FiXCircle } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom'; // Add this import
 import Navbar from '../component/Navbar';
 import api from '../api';
 
@@ -10,6 +11,7 @@ const ClaimDashboard = () => {
   const [user, setUser] = useState(null);
   const [errorUser, setErrorUser] = useState(null);
   const [loadingUser, setLoadingUser] = useState(true);
+  const navigate = useNavigate(); // Add this
 
   const getStatusIcon = (status) => {
     switch (status.toLowerCase()) {
@@ -26,8 +28,11 @@ const ClaimDashboard = () => {
     }
   };
 
-  useEffect(() => {
+  const handleClaimClick = (claim) => {
+    navigate('/details', { state: claim });
+  };
 
+  useEffect(() => {
     const fetchUser = async () => {
       try {
         const response = await api.get('/user/profile/');
@@ -95,7 +100,11 @@ const ClaimDashboard = () => {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {claims.map((claim) => (
-                    <tr key={claim.id} className="hover:bg-gray-50">
+                    <tr 
+                      key={claim.id} 
+                      className="hover:bg-gray-50 cursor-pointer"
+                      onClick={() => handleClaimClick(claim)}
+                    >
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{claim.claim_id}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(claim.incident_date).toLocaleDateString()}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
@@ -110,8 +119,8 @@ const ClaimDashboard = () => {
                           </span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{claim.description}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{claim.location}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 max-w-xs truncate">{claim.description}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 max-w-xs truncate">{claim.location}</td>
                     </tr>
                   ))}
                 </tbody>

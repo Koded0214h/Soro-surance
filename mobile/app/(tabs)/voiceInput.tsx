@@ -7,20 +7,27 @@ import {
   ScrollView,
   TextInput,
   Modal,
+  Alert,
+  ActivityIndicator,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { Audio } from "expo-av";
+import api from "../../src/services/api";
 
 export default function VoiceInput() {
   const [targetLanguage, setTargetLanguage] = useState("Spanish");
-  const [transcription, setTranscription] = useState(
-    "I was driving down the highway when suddenly a car swerved into my lane and hit me. The impact was quite strong, and my car sustained significant damage. I managed to pull over to the side of the road, and the other driver stopped as well. We exchanged information, and I took photos of the accident scene and the damage to both vehicles. I'm feeling a bit shaken up but thankfully not seriously injured."
-  );
-  const [translation, setTranslation] = useState(
-    "Estaba conduciendo por la carretera cuando de repente un coche se desvió hacia mi carril y me golpeó. El impacto fue bastante fuerte y mi coche sufrió daños importantes. Logré detenerme a un lado de la carretera y el otro conductor también se detuvo. Intercambiamos información y tomé fotos del lugar del accidente y de los daños de ambos vehículos. Me siento un poco conmocionado pero afortunadamente no estoy gravemente herido."
-  );
+  const [transcription, setTranscription] = useState("");
+  const [translation, setTranslation] = useState("");
   const [showLanguageModal, setShowLanguageModal] = useState(false);
+  const [recording, setRecording] = useState<Audio.Recording | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordedURI, setRecordedURI] = useState<string | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [sound, setSound] = useState<Audio.Sound | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [claimResult, setClaimResult] = useState<any>(null);
 
   const languages = [
     { name: "Spanish", code: "es" },
@@ -30,29 +37,155 @@ export default function VoiceInput() {
     { name: "Hausa", code: "ha" },
   ];
 
+  useEffect(() => {
+    return () => {
+      if (sound) {
+        sound.unloadAsync();
+      }
+      if (recording) {
+        recording.stopAndUnloadAsync();
+      }
+    };
+  }, [sound, recording]);
+
+  const startRecording = async () => {
+    try {
+      const { status } = await Audio.requestPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert("Permission Required", "Please grant microphone access.");
+        return;
+      }
+
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+        staysActiveInBackground: true,
+      });
+
+      const { recording } = await Audio.Recording.createAsync(
+        Audio.RecordingOptionsPresets.HIGH_QUALITY
+      );
+      
+      setRecording(recording);
+      setIsRecording(true);
+      setRecordedURI(null);
+      setClaimResult(null);
+    } catch (err) {
+      console.error("Recording error:", err);
+      Alert.alert("Error", "Failed to start recording. Please try again.");
+    }
+  };
+
+  const stopRecording = async () => {
+    if (!recording) return;
+
+    try {
+      await recording.stopAndUnloadAsync();
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+      });
+      
+      const uri = recording.getURI();
+      if (uri) {
+        setRecordedURI(uri);
+      }
+    } catch (err) {
+      console.error("Stop recording error:", err);
+      Alert.alert("Error", "Failed to stop recording.");
+    } finally {
+      setRecording(null);
+      setIsRecording(false);
+    }
+  };
+
+  const playRecording = async () => {
+    if (!recordedURI) return;
+
+    try {
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: recordedURI },
+        { shouldPlay: true }
+      );
+      
+      setSound(sound);
+      setIsPlaying(true);
+
+      sound.setOnPlaybackStatusUpdate((status) => {
+        if (status.isLoaded && !status.isPlaying) {
+          setIsPlaying(false);
+        }
+      });
+
+      await sound.playAsync();
+    } catch (err) {
+      console.error("Playback error:", err);
+      Alert.alert("Error", "Failed to play recording.");
+    }
+  };
+
+  const stopPlayback = async () => {
+    if (sound) {
+      await sound.stopAsync();
+      setIsPlaying(false);
+    }
+  };
+
+  const handleTranscribe = async () => {
+    if (!recordedURI) {
+      Alert.alert("No Recording", "Please record audio first.");
+      return;
+    }
+
+    setIsProcessing(true);
+    setTranscription("Processing...");
+
+    try {
+      const formData = new FormData();
+      formData.append('audio', {
+        uri: recordedURI,
+        name: 'recording.m4a',  // iOS prefers .m4a
+        type: 'audio/m4a',      // Correct MIME type
+      } as any);
+
+      const response = await api.post('/claims/voice/', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        timeout: 30000, // 30 second timeout
+      });
+
+      const data = response.data;
+      setTranscription(data.transcription || "No transcription available");
+      setTranslation(data.description || "No translation available");
+      setClaimResult(data);
+
+    } catch (error: any) {
+      console.error("API Error:", error);
+      
+      let errorMsg = "Network request failed";
+      if (error.response) {
+        errorMsg = error.response.data?.error || error.response.statusText;
+      } else if (error.request) {
+        errorMsg = "No response from server";
+      }
+
+      Alert.alert("Error", errorMsg);
+      setTranscription("Error: " + errorMsg);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   const handleLanguageSelect = (language: string) => {
     setTargetLanguage(language);
     setShowLanguageModal(false);
-    // Here you would typically call your translation API
-    // For now, we'll just update the translation based on the selected language
-    updateTranslation(language);
   };
 
-  const updateTranslation = (language: string) => {
-    // Mock translations - in a real app, you'd call your translation API
-    const translations: { [key: string]: string } = {
-      Spanish:
-        "Estaba conduciendo por la carretera cuando de repente un coche se desvió hacia mi carril y me golpeó. El impacto fue bastante fuerte y mi coche sufrió daños importantes. Logré detenerme a un lado de la carretera y el otro conductor también se detuvo. Intercambiamos información y tomé fotos del lugar del accidente y de los daños de ambos vehículos. Me siento un poco conmocionado pero afortunadamente no estoy gravemente herido.",
-      French:
-        "Je conduisais sur l'autoroute quand soudainement une voiture a dévié dans ma voie et m'a heurté. L'impact était assez fort et ma voiture a subi des dommages importants. J'ai réussi à me ranger sur le côté de la route et l'autre conducteur s'est également arrêté. Nous avons échangé des informations et j'ai pris des photos de la scène de l'accident et des dommages aux deux véhicules. Je me sens un peu secoué mais heureusement pas gravement blessé.",
-      Yoruba:
-        "Mo n rin lori ọna nla nigbati ni aṣọtẹlẹ ọkọ ayọkẹlẹ kan ṣubu sinu ọna mi ati lu mi. Ipa naa jẹ ti o lagbara pupọ, ọkọ ayọkẹlẹ mi si jẹ ti o ṣe awọn ibajẹ pataki. Mo ṣe agbara lati fa ọkọ ayọkẹlẹ mi sọtun ọna, ati pe ọkọ ayọkẹlẹ miiran tun duro. A ṣe iṣọpọ alaye, mo si ṣe awọn fọto ti ibi iṣẹlẹ naa ati awọn ibajẹ ti awọn ọkọ ayọkẹlẹ mejeeji. Mo n rọ̀ ọkàn mi ṣugbọn o ṣeun ti ko ṣe ibajẹ nla.",
-      Igbo: "M na-akwọ ụgbọala n'okporo ụzọ awara awara mgbe na mberede otu ụgbọala gbapụrụ n'ụzọ m wee kụọ m. Mmetụta ahụ dị ike nke ukwuu, ụgbọala m mebiri emebi nke ukwuu. M jisiri ike kwụsị n'akụkụ okporo ụzọ, onye ọkwọ ụgbọala nke ọzọ kwụsịkwara. Anyị gbanwere ozi, m wee sere foto nke ebe ihe mberede ahụ na mmebi nke ụgbọala abụọ ahụ. M na-enwe mmetụta dị ntakịrị mana ọ dị mma na anaghị m emerụ ahụ nke ukwuu.",
-      Hausa:
-        "Ina tuka mota a kan babbar hanya lokacin da kwatsam wata mota ta karkata zuwa hanyata ta buge ni. Tasirin ya kasance mai karfi sosai, kuma motata ta sami lalacewa mai muhimmanci. Na sami damar tsayawa a gefen hanya, kuma direban sa kuma ya tsaya. Mun musanya bayanai, kuma na dauki hotuna na wurin hadarin da lalacewar motocin biyu. Ina jin dan girgiza amma alhamdulillah ban sami rauni mai tsanani ba.",
-    };
-
-    setTranslation(translations[language] || translations.Spanish);
+  const resetForm = () => {
+    setTranscription("");
+    setTranslation("");
+    setRecordedURI(null);
+    setClaimResult(null);
   };
 
   return (
@@ -66,7 +199,9 @@ export default function VoiceInput() {
           <Ionicons name="arrow-back" size={24} color="#1C1C1E" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Voice Input</Text>
-        <View style={styles.placeholder} />
+        <TouchableOpacity onPress={resetForm} style={styles.resetButton}>
+          <Ionicons name="refresh" size={24} color="#007AFF" />
+        </TouchableOpacity>
       </View>
 
       <ScrollView
@@ -74,6 +209,47 @@ export default function VoiceInput() {
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
       >
+        {/* Voice Recording Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>VOICE RECORDING</Text>
+          <View style={styles.recordingContainer}>
+            <TouchableOpacity
+              style={[
+                styles.recordButton,
+                isRecording && styles.recordingButton,
+              ]}
+              onPress={isRecording ? stopRecording : startRecording}
+            >
+              <Ionicons
+                name={isRecording ? "stop" : "mic"}
+                size={32}
+                color="#FFF"
+              />
+            </TouchableOpacity>
+            <Text style={styles.recordingText}>
+              {isRecording ? "Recording... Tap to stop" : "Tap to start recording"}
+            </Text>
+          </View>
+
+          {recordedURI && (
+            <View style={styles.playbackContainer}>
+              <TouchableOpacity
+                style={styles.playButton}
+                onPress={isPlaying ? stopPlayback : playRecording}
+              >
+                <Ionicons
+                  name={isPlaying ? "pause" : "play"}
+                  size={24}
+                  color="#007AFF"
+                />
+                <Text style={styles.playButtonText}>
+                  {isPlaying ? "Pause" : "Play Recording"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
+
         {/* Transcription Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>TRANSCRIPTION</Text>
@@ -83,10 +259,27 @@ export default function VoiceInput() {
               value={transcription}
               onChangeText={setTranscription}
               multiline
-              placeholder="Enter or edit your transcription here..."
+              placeholder="Your transcription will appear here..."
               placeholderTextColor="#8E8E93"
+              editable={!isProcessing}
             />
           </View>
+          {recordedURI && (
+            <TouchableOpacity
+              style={[styles.transcribeButton, isProcessing && styles.disabledButton]}
+              onPress={handleTranscribe}
+              disabled={isProcessing}
+            >
+              {isProcessing ? (
+                <ActivityIndicator size="small" color="#FFF" />
+              ) : (
+                <>
+                  <Ionicons name="document-text" size={20} color="#FFF" />
+                  <Text style={styles.transcribeButtonText}>Process Audio</Text>
+                </>
+              )}
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* Target Language Section */}
@@ -105,9 +298,37 @@ export default function VoiceInput() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>TRANSLATION</Text>
           <View style={styles.textBox}>
-            <Text style={styles.translationText}>{translation}</Text>
+            <TextInput
+              style={styles.transcriptionInput}
+              value={translation}
+              onChangeText={setTranslation}
+              multiline
+              placeholder="Translation will appear here..."
+              placeholderTextColor="#8E8E93"
+              editable={false}
+            />
           </View>
         </View>
+
+        {/* Claim Result */}
+        {claimResult && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>CLAIM CREATED</Text>
+            <View style={styles.claimResultBox}>
+              <Text style={styles.claimId}>Claim ID: {claimResult.claim_id}</Text>
+              <Text style={styles.claimType}>Type: {claimResult.claim_type}</Text>
+              <Text style={styles.claimLocation}>Location: {claimResult.location}</Text>
+              <Text style={styles.claimDescription}>{claimResult.description}</Text>
+            </View>
+          </View>
+        )}
+
+        {isProcessing && (
+          <View style={styles.processingContainer}>
+            <ActivityIndicator size="large" color="#007AFF" />
+            <Text style={styles.processingText}>Processing your voice recording...</Text>
+          </View>
+        )}
       </ScrollView>
 
       {/* Language Selection Modal */}
@@ -176,13 +397,13 @@ const styles = StyleSheet.create({
   backButton: {
     padding: 8,
   },
+  resetButton: {
+    padding: 8,
+  },
   headerTitle: {
     fontSize: 18,
     fontWeight: "700",
     color: "#1C1C1E",
-  },
-  placeholder: {
-    width: 40,
   },
   content: {
     flex: 1,
@@ -190,7 +411,7 @@ const styles = StyleSheet.create({
     paddingTop: 20,
   },
   contentContainer: {
-    paddingBottom: 100, // Add padding to account for tab bar height (60px) + extra space
+    paddingBottom: 100,
   },
   section: {
     marginBottom: 30,
@@ -201,6 +422,53 @@ const styles = StyleSheet.create({
     color: "#1C1C1E",
     marginBottom: 12,
     letterSpacing: 0.5,
+  },
+  recordingContainer: {
+    alignItems: "center",
+    paddingVertical: 20,
+  },
+  recordButton: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "#007AFF",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  recordingButton: {
+    backgroundColor: "#FF3B30",
+  },
+  recordingText: {
+    fontSize: 16,
+    color: "#8E8E93",
+    textAlign: "center",
+  },
+  playbackContainer: {
+    marginTop: 20,
+    alignItems: "center",
+  },
+  playButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F2F2F7",
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 20,
+  },
+  playButtonText: {
+    marginLeft: 8,
+    fontSize: 16,
+    color: "#007AFF",
+    fontWeight: "500",
   },
   textBox: {
     backgroundColor: "#FFF",
@@ -217,6 +485,25 @@ const styles = StyleSheet.create({
     textAlignVertical: "top",
     flex: 1,
   },
+  transcribeButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#007AFF",
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 20,
+    marginTop: 12,
+  },
+  disabledButton: {
+    backgroundColor: "#8E8E93",
+  },
+  transcribeButtonText: {
+    marginLeft: 8,
+    fontSize: 16,
+    color: "#FFF",
+    fontWeight: "500",
+  },
   languageBox: {
     backgroundColor: "#F2F2F7",
     borderRadius: 12,
@@ -229,11 +516,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#1C1C1E",
     fontWeight: "500",
-  },
-  translationText: {
-    fontSize: 16,
-    color: "#1C1C1E",
-    lineHeight: 24,
   },
   modalOverlay: {
     flex: 1,
@@ -281,5 +563,41 @@ const styles = StyleSheet.create({
   selectedLanguageText: {
     color: "#007AFF",
     fontWeight: "600",
+  },
+  processingContainer: {
+    alignItems: "center",
+    paddingVertical: 20,
+  },
+  processingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: "#007AFF",
+  },
+  claimResultBox: {
+    backgroundColor: "#F0F8FF",
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 10,
+  },
+  claimId: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#007AFF",
+    marginBottom: 4,
+  },
+  claimType: {
+    fontSize: 14,
+    color: "#1C1C1E",
+    marginBottom: 2,
+  },
+  claimLocation: {
+    fontSize: 14,
+    color: "#1C1C1E",
+    marginBottom: 2,
+  },
+  claimDescription: {
+    fontSize: 14,
+    color: "#1C1C1E",
+    marginTop: 8,
   },
 });

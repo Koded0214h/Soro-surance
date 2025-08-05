@@ -70,7 +70,7 @@ def test_whisper_transcription(audio_file_path):
 
 if __name__ == "__main__":
     # Configuration
-    AUDIO_FILE = 'claim.wav'  # Change this to your audio file
+    AUDIO_FILE = 'voice_claim_yo.mp3'  # Change this to your audio file
     
     print("Whisper Yoruba Transcription Test")
     print("---------------------------------")

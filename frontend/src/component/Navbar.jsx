@@ -13,7 +13,7 @@ const Navbar = () => {
 
           {/* Right-aligned navigation links */}
           <div className="flex space-x-8">
-            <Link to="udash" className="text-orange-700 text-md font-medium hover:text-orange-600">
+            <Link to="/udash" className="text-orange-700 text-md font-medium hover:text-orange-600">
               Dashboard
             </Link>
             <Link to="/claimd" className="text-orange-700 text-md font-medium hover:text-orange-600">

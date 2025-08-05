@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { FaUpload } from 'react-icons/fa';
 import Navbar from '../component/Navbar';
 import api from '../api';
 
@@ -11,38 +12,39 @@ const AutoFilledClaimForm = () => {
     description: '',
     incident_date: '',
     location: '',
-    voice_transcript: '' // Added to match backend model
+    voice_transcript: ''
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [transcription, setTranscription] = useState('');
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [filePreview, setFilePreview] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     if (location.state?.transcription) {
       setTranscription(location.state.transcription);
       
-      // If we have initial data from the backend, use that
       if (location.state?.initialData) {
         setFormData(prev => ({
           ...prev,
           ...location.state.initialData,
-          voice_transcript: location.state.transcription, // Include transcription
-          incident_date: new Date().toISOString().split('T')[0] // Default to today
+          voice_transcript: location.state.transcription,
+          incident_date: new Date().toISOString().split('T')[0]
         }));
       } else {
-        // Fallback to parsing if no initial data
         parseTranscription(location.state.transcription);
       }
     }
   }, [location.state]);
-  
+
   const parseTranscription = (text) => {
     const newFormData = {
       claim_type: detectClaimType(text),
       description: text,
       incident_date: extractDate(text) || new Date().toISOString().split('T')[0],
       location: extractLocation(text),
-      voice_transcript: text // Include the full transcription
+      voice_transcript: text
     };
     setFormData(newFormData);
   };
@@ -77,17 +79,92 @@ const AutoFilledClaimForm = () => {
     return matches.length > 0 ? matches[0][1] : '';
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }));
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+    if (!validTypes.includes(file.type)) {
+      alert('Please upload a valid image (JPEG, PNG, WEBP) or PDF file');
+      return;
+    }
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('File size should be less than 5MB');
+      return;
+    }
+
+    setSelectedFile(file);
+
+    // Create preview for images
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (e) => setFilePreview(e.target.result);
+      reader.readAsDataURL(file);
+    } else {
+      setFilePreview(null);
+    }
+  };
+
+  const uploadAttachment = async (claimId) => {
+    if (!selectedFile) return null;
+
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+
+    try {
+      const response = await api.post(`/claims/${claimId}/upload/`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data.id;
+    } catch (error) {
+      console.error('Error uploading attachment:', error);
+      return null;
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!validateForm()) return;
+
+    setLoading(true);
+    
+    try {
+      // First create the claim
+      const claimResponse = await api.post('/claims/', {
+        ...formData,
+        voice_transcript: transcription
+      });
+
+      // Then upload attachment if exists
+      if (selectedFile) {
+        setIsUploading(true);
+        const attachmentId = await uploadAttachment(claimResponse.data.claim_id);
+        if (attachmentId) {
+          // Update claim with attachment
+          await api.patch(`/claims/${claimResponse.data.id}/`, {
+            attachment: attachmentId
+          });
+        }
+      }
+
+      navigate('/claim-confirmation', { 
+        state: { 
+          claimId: claimResponse.data.claim_id,
+          claimData: claimResponse.data 
+        } 
+      });
+    } catch (error) {
+      console.error('Error submitting claim:', error);
+      alert(`Failed to submit claim: ${error.response?.data?.error || error.message}`);
+    } finally {
+      setLoading(false);
+      setIsUploading(false);
     }
   };
 
@@ -101,33 +178,6 @@ const AutoFilledClaimForm = () => {
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!validateForm()) return;
-
-    setLoading(true);
-    
-    try {
-      const response = await api.post('/claims/', {
-        ...formData,
-        voice_transcript: transcription // Ensure we include the transcription
-      });
-      
-      navigate('/claim-confirmation', { 
-        state: { 
-          claimId: response.data.claim_id,
-          claimData: response.data 
-        } 
-      });
-    } catch (error) {
-      console.error('Error submitting claim:', error);
-      alert('Failed to submit claim. Please try again.');
-    } finally {
-      setLoading(false);
-    }
   };
 
   const claimTypes = [
@@ -161,7 +211,7 @@ const AutoFilledClaimForm = () => {
                 <select
                   name="claim_type"
                   value={formData.claim_type}
-                  onChange={handleChange}
+                  onChange={(e) => setFormData({...formData, claim_type: e.target.value})}
                   className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                     errors.claim_type ? 'border-red-500' : 'border-gray-300'
                   }`}
@@ -183,7 +233,7 @@ const AutoFilledClaimForm = () => {
                 <textarea
                   name="description"
                   value={formData.description}
-                  onChange={handleChange}
+                  onChange={(e) => setFormData({...formData, description: e.target.value})}
                   rows={4}
                   className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                     errors.description ? 'border-red-500' : 'border-gray-300'
@@ -204,7 +254,7 @@ const AutoFilledClaimForm = () => {
                     type="date"
                     name="incident_date"
                     value={formData.incident_date}
-                    onChange={handleChange}
+                    onChange={(e) => setFormData({...formData, incident_date: e.target.value})}
                     className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                       errors.incident_date ? 'border-red-500' : 'border-gray-300'
                     }`}
@@ -222,7 +272,7 @@ const AutoFilledClaimForm = () => {
                     type="text"
                     name="location"
                     value={formData.location}
-                    onChange={handleChange}
+                    onChange={(e) => setFormData({...formData, location: e.target.value})}
                     className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                       errors.location ? 'border-red-500' : 'border-gray-300'
                     }`}
@@ -232,6 +282,39 @@ const AutoFilledClaimForm = () => {
                     <p className="text-red-500 text-xs mt-1">{errors.location}</p>
                   )}
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Incident Evidence (Optional)
+                </label>
+                <div className="mt-1 flex items-center">
+                  <label className="cursor-pointer bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <FaUpload className="inline mr-2" />
+                    Upload File
+                    <input 
+                      type="file" 
+                      className="hidden" 
+                      onChange={handleFileChange}
+                      accept="image/*,.pdf"
+                    />
+                  </label>
+                  <span className="ml-3 text-sm text-gray-500">
+                    {selectedFile ? selectedFile.name : 'No file selected'}
+                  </span>
+                </div>
+                {filePreview && selectedFile.type.startsWith('image/') && (
+                  <div className="mt-2">
+                    <img 
+                      src={filePreview} 
+                      alt="Preview" 
+                      className="h-32 object-contain border rounded"
+                    />
+                  </div>
+                )}
+                <p className="mt-1 text-xs text-gray-500">
+                  Upload images (JPEG, PNG) or PDF files (Max 5MB)
+                </p>
               </div>
 
               <div className="flex justify-end space-x-4 pt-6">
@@ -244,10 +327,11 @@ const AutoFilledClaimForm = () => {
                 </button>
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || isUploading}
                   className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
                 >
-                  {loading ? 'Submitting...' : 'Submit Claim'}
+                  {loading ? 'Submitting...' : 
+                   isUploading ? 'Uploading Attachment...' : 'Submit Claim'}
                 </button>
               </div>
             </form>

@@ -15,7 +15,7 @@ const ClaimConfirmation = () => {
 
     // Set up the redirect timer
     const redirectTimer = setTimeout(() => {
-      navigate('/claim-dashboard'); // Redirect to dashboard after 1 second
+      navigate('/claimd'); // Redirect to dashboard after 1 second
     }, 1000);
 
     // Clean up the timer if component unmounts

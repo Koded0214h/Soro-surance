@@ -37,7 +37,6 @@ class ClaimSerializer(serializers.ModelSerializer):
             'incident_date',
             'voice_transcript',
             'status',
-            'created_at'
         ]
         read_only_fields = ['id', 'claim_id', 'user', 'status', 'created_at']
 
@@ -45,7 +44,7 @@ class ClaimSerializer(serializers.ModelSerializer):
 class AttachmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Attachment
-        fields = ['id', 'claim', 'file', 'uploaded_at']
+        fields = ['id', 'file', 'uploaded_at']
         read_only_fields = ['id', 'uploaded_at']
 
 class AdminMetricsSerializer(serializers.Serializer):

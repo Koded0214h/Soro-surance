@@ -45,6 +45,7 @@ class Claim(models.Model):
     incident_date = models.DateField()
     voice_transcript = models.TextField(blank=True, null=True)  # Stores the speech-to-text output
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='submitted')
+    updated_at = models.DateTimeField(auto_now=True)
     submitted_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,

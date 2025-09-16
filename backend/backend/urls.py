@@ -19,11 +19,12 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
-from core.admin import sorosurance_admin_site  
+# from core.admin import sorosurance_admin_site  
 
 urlpatterns = [
-    path('admin/', sorosurance_admin_site.urls),
-    path('api/', include('core.urls')),
+    # path('admin/', sorosurance_admin_site.urls),
+    path('api/v1/', include('core.urls')),
+    path('api/v1/', include('users.urls')),
     
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),

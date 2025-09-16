@@ -12,12 +12,12 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.contrib.auth import get_user_model
 from datetime import datetime, timedelta
-from django.contrib.auth import authenticate
+
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.utils import timezone
 
 from .serializers import (
-    RegisterSerializer, ClaimSerializer,
+    ClaimSerializer,
     AttachmentSerializer,
     AdminMetricsSerializer, TrendsSerializer, FraudSerializer
 )
@@ -187,10 +187,6 @@ class VoiceToTextView(APIView):
 
 
 
-class RegisterView(generics.CreateAPIView):
-    queryset = User.objects.all()
-    serializer_class = RegisterSerializer
-
 class ClaimCreateView(generics.CreateAPIView):
     queryset = Claim.objects.all()
     serializer_class = ClaimSerializer
@@ -251,15 +247,6 @@ class UserClaimListView(generics.ListAPIView):
         user = self.request.user
         return Claim.objects.filter(submitted_by=user).order_by('-created_at')
 
-class UserProfileView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        user = request.user
-        return Response({
-            "full_name": user.full_name,
-            "email": user.email,
-        })
     
 class AdminClaimUpdateView(generics.UpdateAPIView):
     queryset = Claim.objects.all()
@@ -338,29 +325,7 @@ def send_claim_confirmation_email(claim, to_email, is_guest=False):
     email.attach_alternative(html_content, "text/html")
     email.send()
 
-class AdminLoginView(APIView):
-    def post(self, request):
-        email = request.data.get('email')
-        password = request.data.get('password')
-        
-        user = authenticate(email=email, password=password)
-        
-        if user is None or not user.is_staff:
-            return Response(
-                {'detail': 'Invalid credentials or not an admin'},
-                status=status.HTTP_401_UNAUTHORIZED
-            )
-            
-        refresh = RefreshToken.for_user(user)
-        return Response({
-            'access': str(refresh.access_token),
-            'refresh': str(refresh),
-            'user': {
-                'id': user.id,
-                'email': user.email,
-                'name': user.get_full_name()
-            }
-        })   
+
         
 @api_view(['POST'])
 def admin_password_reset(request):
@@ -381,45 +346,7 @@ def admin_password_reset(request):
     
     return Response({'detail': 'Password reset link sent'}) 
     
-class AdminMetricsView(APIView):
-    permission_classes = [IsAdminUser]
-    
-    def get(self, request):
-        # Calculate metrics
-        total_claims = Claim.objects.count()
-        approved_claims = Claim.objects.filter(status='approved').count()
-        flagged_claims = Claim.objects.filter(status='flagged').count()
-        rejected_claims = Claim.objects.filter(status='rejected').count()
-        
-        # Calculate changes from last month
-        now = timezone.now()
-        last_month = now - timedelta(days=30)
-        
-        # Previous period counts
-        prev_total = Claim.objects.filter(created_at__lt=last_month).count()
-        prev_approved = Claim.objects.filter(status='approved', created_at__lt=last_month).count()
-        prev_flagged = Claim.objects.filter(status='flagged', created_at__lt=last_month).count()
-        prev_rejected = Claim.objects.filter(status='rejected', created_at__lt=last_month).count()
-        
-        # Calculate percentage changes
-        def calc_change(current, previous):
-            if previous == 0:
-                return 0.0
-            return round(((current - previous) / previous) * 100, 1)
-        
-        data = {
-            'total_claims': total_claims,
-            'approved_claims': approved_claims,
-            'flagged_claims': flagged_claims,
-            'rejected_claims': rejected_claims,
-            'received_change': calc_change(total_claims, prev_total),
-            'approved_change': calc_change(approved_claims, prev_approved),
-            'flagged_change': calc_change(flagged_claims, prev_flagged),
-            'rejected_change': calc_change(rejected_claims, prev_rejected),
-        }
-        
-        serializer = AdminMetricsSerializer(data)
-        return Response(serializer.data)
+
 
 class ClaimsTrendsView(APIView):
     permission_classes = [IsAdminUser]
